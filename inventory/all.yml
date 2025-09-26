@@ -1,6 +1,23 @@
 ---
 all:
   vars:
+    set_disconnected: false
+    set_sync: false
+    set_cv: false
+    set_environments: false
+    set_lvm: false
+    set_installer: false
+    set_3rdparty: false
+    set_manifest: false
+    set_sync_repos: false
+    set_global: false
+    set_locations: false
+    set_force_register: false
+    set_fresh_install: false
+    set_repos: false
+    set_sync_plan: false
+    set_ak: false
+    set_force_promote: true
     location: CH
     timezone: Europe\Zurich
   hosts:
