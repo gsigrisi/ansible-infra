@@ -1,4 +1,4 @@
 ---
 roles:
   - src: ryandaniels.create_users
-  #name: pinguozzo.create_users
+    name: pinguozzo.create_users
