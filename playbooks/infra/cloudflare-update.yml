@@ -20,7 +20,7 @@
           wait_for_connection:
             timeout: 2
           vars:
-            ansible_connection: ssh
+            ansible_connection: "{{ hostvars[inventory_hostname].ansible_connection }}"
         - name: add devices with connectivity to the "running_hosts" group
           group_by:
             key: "running_hosts"
