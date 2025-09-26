@@ -2,6 +2,7 @@
 collections:
   - name: awx.awx
   - name: ansible.controller
+    version: latest
   - name: ansible.posix
   - name: community.general
   - name: community.vmware
