@@ -1,0 +1,10 @@
+- name: "RHV: HE Backup"
+  hosts: virt-console
+  become: yes
+  tags: he-backup
+
+  vars:
+    retention_days: 1w
+
+  roles:
+    - ../roles/pinguozzo.ovirt-he-backup
