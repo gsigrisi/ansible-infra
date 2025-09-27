@@ -61,10 +61,12 @@ all:
           vars:
             ansible_user: rex
             ansible_python_interpreter: auto
+        he-backup:
+          vars:
+            ansible_user: rex
+            ansible_python_interpreter: auto
           hosts:
-            sm01.mgmt.zg.pinguozzo.com:
-            sm02.mgmt.zg.pinguozzo.com:
-            sm03.mgmt.zg.pinguozzo.com:
+            virt-console.mgmt.zg.pinguozzo.com
         mgmt:
           vars:
             ansible_connection: local
