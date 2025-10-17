@@ -7,9 +7,9 @@
   ansible.builtin.import_playbook: cv_version_create.yml
   tags: cv_create
 
-- name: Include cv_version_publish.yml
-  ansible.builtin.import_playbook: cv_version_publish.yml
-  tags: cv_publish
+# - name: Include cv_version_publish.yml
+#   ansible.builtin.import_playbook: cv_version_publish.yml
+#   tags: cv_publish
 
 - name: Include cv_version_promote.yml
   ansible.builtin.import_playbook: cv_version_promote.yml

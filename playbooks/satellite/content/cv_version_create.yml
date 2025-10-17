@@ -6,29 +6,29 @@
     - role: redhat.satellite.content_views
 
   tasks:
-    - name: "Create Content Views (w/o Composite Content views)"
-      redhat.satellite.content_view:
-        username: "{{ satellite_username }}"
-        password: "{{ satellite_password }}"
-        server_url: "{{ satellite_server_url }}"
-        organization: "{{ satellite_organization }}"
-        name: "{{ item.name }}"
-        repositories: "{{ item.repositories }}"
-        validate_certs: false
-      loop: "{{ content_views }}"
-      tags: content_views
+  #  - name: "Create Content Views (w/o Composite Content views)"
+  #    redhat.satellite.content_view:
+  #      username: "{{ satellite_username }}"
+  #      password: "{{ satellite_password }}"
+  #      server_url: "{{ satellite_server_url }}"
+  #      organization: "{{ satellite_organization }}"
+  #      name: "{{ item.name }}"
+  #      repositories: "{{ item.repositories }}"
+  #      validate_certs: false
+  #    loop: "{{ content_views }}"
+  #    tags: content_views
 
-    - name: "Create Composite Content Views"
-      redhat.satellite.content_view:
-        username: "{{ satellite_username }}"
-        password: "{{ satellite_password }}"
-        server_url: "{{ satellite_server_url }}"
-        validate_certs: false
-        organization: "{{ satellite_organization }}"
-        name: "{{ item.name }}"
-        composite: true
-        components: "{{ item.cv | json_query(j_query) }}"
-      loop: "{{ ccv }}"
-      vars:
-        j_query: "[*].{ content_view: @, latest: 'true' }"
-      tags: ccv
+  #  - name: "Create Composite Content Views"
+  #    redhat.satellite.content_view:
+  #      username: "{{ satellite_username }}"
+  #      password: "{{ satellite_password }}"
+  #      server_url: "{{ satellite_server_url }}"
+  #      validate_certs: false
+  #      organization: "{{ satellite_organization }}"
+  #      name: "{{ item.name }}"
+  #      composite: true
+  #      components: "{{ item.cv | json_query(j_query) }}"
+  #    loop: "{{ ccv }}"
+  #    vars:
+  #      j_query: "[*].{ content_view: @, latest: 'true' }"
+  #    tags: ccv
