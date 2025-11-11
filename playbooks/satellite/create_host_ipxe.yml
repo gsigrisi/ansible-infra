@@ -31,6 +31,7 @@
     - name: create host(s)
       redhat.satellite.host:
         hostgroup: "{{ hg_name }}"
+        #name: "{{ vm_name ~ (vm_name is defined and num_instances | int > 1 )|ternary(item, '') ~ '.' ~ domain_name }}"
         name: "{{ vm_name | default(lookup('community.general.random_pet'), true) ~ (vm_name is defined and num_instances | int > 1 )|ternary(item, '') ~ '.' ~ domain_name }}"
         state: present
         build: true

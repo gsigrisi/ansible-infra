@@ -17,6 +17,10 @@ all:
       ansible_ssh_host: 10.0.0.6
       ansible_user: rex
 
+    gva.wg.pinguozzo.com:
+      ansible_ssh_host: 192.168.80.178
+      ansible_user: rex
+
   children:
     ddns:
      children:
@@ -26,3 +30,6 @@ all:
        comski:
          hosts:
            comski.wg.pinguozzo.com
+       gva:
+         hosts:
+           gva.wg.pinguozzo.com

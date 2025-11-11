@@ -61,18 +61,22 @@ satellite_composite_content_views:
 
 cv:
   - name: cv-capsules
-  - name: cv-rhel10
-  - name: cv-rhel9
-  - name: cv-rhel8
+#  - name: cv-rhel10
+#  - name: cv-rhel9
+#  - name: cv-rhel8
 
 satellite_content_views:
   - name: cv-capsules
     description: "Red Hat Capsules Content"
     repositories:
       - { name: 'Red Hat Satellite 6.17 for RHEL 9 x86_64 RPMs', product: 'Red Hat Satellite' }
+      - { name: 'Red Hat Satellite 6.18 for RHEL 9 x86_64 RPMs', product: 'Red Hat Satellite' }
       - { name: 'Red Hat Satellite Capsule 6.17 for RHEL 9 x86_64 RPMs', product: 'Red Hat Satellite Capsule' }
+      - { name: 'Red Hat Satellite Capsule 6.18 for RHEL 9 x86_64 RPMs', product: 'Red Hat Satellite Capsule' }
       - { name: 'Red Hat Satellite Maintenance 6.17 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
+      - { name: 'Red Hat Satellite Maintenance 6.18 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Red Hat Satellite Utils 6.17 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
+      - { name: 'Red Hat Satellite Utils 6.18 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Red Hat Enterprise Linux 9 for x86_64 - AppStream Kickstart 9.0', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Red Hat Enterprise Linux 9 for x86_64 - BaseOS Kickstart 9.0', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Red Hat Enterprise Linux 9 for x86_64 - AppStream RPMs 9', product: 'Red Hat Enterprise Linux for x86_64' }
@@ -117,9 +121,13 @@ satellite_content_views:
       - { name: 'Red Hat Ceph Storage Tools 6 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Red Hat Ceph Storage Tools 7 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Red Hat Satellite 6.17 for RHEL 9 x86_64 RPMs', product: 'Red Hat Satellite' }
+      - { name: 'Red Hat Satellite 6.18 for RHEL 9 x86_64 RPMs', product: 'Red Hat Satellite' }
       - { name: 'Red Hat Satellite Capsule 6.17 for RHEL 9 x86_64 RPMs', product: 'Red Hat Satellite Capsule' }
+      - { name: 'Red Hat Satellite Capsule 6.18 for RHEL 9 x86_64 RPMs', product: 'Red Hat Satellite Capsule' }
       - { name: 'Red Hat Satellite Maintenance 6.17 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
+      - { name: 'Red Hat Satellite Maintenance 6.18 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Red Hat Satellite Utils 6.17 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
+      - { name: 'Red Hat Satellite Utils 6.18 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
 
   - name: cv-rhel8
     description: "RHEL 8 SOE Content"
@@ -289,10 +297,12 @@ satellite_products:
   - name: Red Hat Enterprise Linux for x86_64
     repository_sets:
       - name: Red Hat Satellite Utils 6.17 for RHEL 9 x86_64 (RPMs)
+      - name: Red Hat Satellite Utils 6.18 for RHEL 9 x86_64 (RPMs)
       - name: Red Hat Satellite Client 6 for RHEL 8 x86_64 (RPMs)
       - name: Red Hat Satellite Client 6 for RHEL 9 x86_64 (RPMs)
       - name: Red Hat Satellite Client 6 for RHEL 10 x86_64 (RPMs)
       - name: Red Hat Satellite Maintenance 6.17 for RHEL 9 x86_64 (RPMs)
+      - name: Red Hat Satellite Maintenance 6.18 for RHEL 9 x86_64 (RPMs)
       - name: Red Hat Ceph Storage Tools 4 for RHEL 8 x86_64 (RPMs)
       - name: Red Hat Ceph Storage Tools 5 for RHEL 9 x86_64 (RPMs)
       - name: Red Hat Ceph Storage Tools 6 for RHEL 9 x86_64 (RPMs)
@@ -314,10 +324,12 @@ satellite_products:
   - name: Red Hat Satellite
     repository_sets:
       - name: Red Hat Satellite 6.17 for RHEL 9 x86_64 (RPMs)
+      - name: Red Hat Satellite 6.18 for RHEL 9 x86_64 (RPMs)
 
   - name: Red Hat Satellite Capsule
     repository_sets:
       - name: Red Hat Satellite Capsule 6.17 for RHEL 9 x86_64 (RPMs)
+      - name: Red Hat Satellite Capsule 6.18 for RHEL 9 x86_64 (RPMs)
 
   - name: Red Hat Enterprise Linux Fast Datapath
     repository_sets:
