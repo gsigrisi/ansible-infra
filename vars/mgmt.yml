@@ -60,7 +60,7 @@ satellite_composite_content_views:
       - LAB
 
 cv:
-  - name: cv-capsules
+#  - name: cv-capsules
 #  - name: cv-rhel10
 #  - name: cv-rhel9
 #  - name: cv-rhel8
@@ -132,10 +132,10 @@ satellite_content_views:
   - name: cv-rhel8
     description: "RHEL 8 SOE Content"
     repositories:
-      - { name: 'Red Hat Enterprise Linux 8 for x86_64 - AppStream Kickstart 8.0', product: 'Red Hat Enterprise Linux for x86_64' }
+      - { name: 'Red Hat Enterprise Linux 8 for x86_64 - AppStream Kickstart 8.10', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Red Hat Enterprise Linux 8 for x86_64 - AppStream RPMs 8', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Red Hat Enterprise Linux 8 for x86_64 - AppStream RPMs 8.10', product: 'Red Hat Enterprise Linux for x86_64' }
-      - { name: 'Red Hat Enterprise Linux 8 for x86_64 - BaseOS Kickstart 8.0', product: 'Red Hat Enterprise Linux for x86_64' }
+      - { name: 'Red Hat Enterprise Linux 8 for x86_64 - BaseOS Kickstart 8.10', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Red Hat Enterprise Linux 8 for x86_64 - BaseOS RPMs 8', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Red Hat Enterprise Linux 8 for x86_64 - BaseOS RPMs 8.10', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Fast Datapath for RHEL 8 x86_64 RPMs', product: 'Red Hat Enterprise Linux Fast Datapath' }
@@ -243,6 +243,11 @@ satellite_products:
         releasever: 8.0
       - name: Red Hat Enterprise Linux 8 for x86_64 - BaseOS (Kickstart)
         releasever: 8.0
+        download_policy: immediate
+      - name: Red Hat Enterprise Linux 8 for x86_64 - AppStream (Kickstart)
+        releasever: "8.10"
+      - name: Red Hat Enterprise Linux 8 for x86_64 - BaseOS (Kickstart)
+        releasever: "8.10"
         download_policy: immediate
       - name: Red Hat Enterprise Linux 8 for x86_64 - AppStream (RPMs)
         releasever: 8
