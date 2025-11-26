@@ -14,7 +14,7 @@
         server_url: "{{ satellite_server_url }}"
         validate_certs: "{{ satellite_validate_certs }}"
         organization: "{{ satellite_organization }}"
-        search: 'label = "rhel-7-server-els-rpms"'
+        search: 'label = "ansible-automation-platform-2.6-for-rhel-10-x86_64-rpms"'
         # search: 'label = "jb-eap-7.4-for-rhel-8-x86_64-rpms"'
         # search: 'label = "satellite-capsule-6.14-for-rhel-8-x86_64-rpms"'
         # search: 'label = "rhel-7-server-ansible-2-rpm"'

@@ -96,6 +96,7 @@ satellite_content_views:
       - { name: 'Red Hat Enterprise Linux 10 for x86_64 - BaseOS RPMs 10', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Red Hat CodeReady Linux Builder for RHEL 10 x86_64 RPMs 10', product: 'Red Hat CodeReady Linux Builder for x86_64' }
       - { name: 'Red Hat Satellite Client 6 for RHEL 10 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
+      - { name: 'Red Hat Ansible Automation Platform 2.6 for RHEL 10 x86_64 RPMs', product: 'Red Hat Ansible Automation Platform' }
 
   - name: cv-rhel9
     description: "RHEL 9 SOE Content"
@@ -112,8 +113,6 @@ satellite_content_views:
       - { name: 'Red Hat Enterprise Linux 9 for x86_64 - BaseOS RPMs 9.6', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Red Hat Satellite Client 6 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Red Hat Enterprise Linux 9 for x86_64 - Supplementary RPMs 9', product: 'Red Hat Enterprise Linux for x86_64' }
-      - { name: 'Red Hat Ansible Automation Platform 2.4 for RHEL 9 x86_64 RPMs', product: 'Red Hat Ansible Automation Platform' }
-      - { name: 'Red Hat Ansible Automation Platform 2.5 for RHEL 9 x86_64 RPMs', product: 'Red Hat Ansible Automation Platform' }
       - { name: 'Red Hat CodeReady Linux Builder for RHEL 9 x86_64 RPMs 9', product: 'Red Hat CodeReady Linux Builder for x86_64' }
       - { name: 'Red Hat Ceph Storage Tools 5 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Red Hat Ceph Storage Tools 6 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
@@ -139,14 +138,11 @@ satellite_content_views:
       - { name: 'Fast Datapath for RHEL 8 x86_64 RPMs', product: 'Red Hat Enterprise Linux Fast Datapath' }
       - { name: 'Red Hat Satellite Client 6 for RHEL 8 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Red Hat Enterprise Linux 8 for x86_64 - Supplementary RPMs 8', product: 'Red Hat Enterprise Linux for x86_64' }
-      - { name: 'Red Hat Ansible Automation Platform 2.4 for RHEL 8 x86_64 RPMs', product: 'Red Hat Ansible Automation Platform' }
-      - { name: 'Red Hat Ansible Automation Platform 2.5 for RHEL 8 x86_64 RPMs', product: 'Red Hat Ansible Automation Platform' }
       - { name: 'JBoss Enterprise Application Platform 7.4 RHEL 8 RPMs', product: 'JBoss Enterprise Application Platform' }
       - { name: 'JBoss Enterprise Application Platform 7.3 RHEL 8 RPMs', product: 'JBoss Enterprise Application Platform' }
       - { name: 'Single Sign-On 7.6 for RHEL 8 x86_64 RPMs', product: 'Red Hat Single Sign-On' }
       - { name: 'Single Sign-On 7.5 for RHEL 8 x86_64 RPMs', product: 'Red Hat Single Sign-On' }
       - { name: 'Single Sign-On 7.4 for RHEL 8 x86_64 RPMs', product: 'Red Hat Single Sign-On' }
-      - { name: 'Red Hat Automation Hub 4.2 for RHEL 8 x86_64 RPMs', product: 'Red Hat Ansible Automation Platform' }
       - { name: 'Red Hat Virtualization Manager 4.4 for RHEL 8 x86_64 RPMs', product: 'Red Hat Virtualization Manager' }
       - { name: 'Red Hat Virtualization 4 Management Agents for RHEL 8 x86_64 RPMs', product: 'Red Hat Virtualization' }
       - { name: 'Advanced Virtualization for RHEL 8 x86_64 RPMs', product: 'Red Hat Enterprise Linux Advanced Virtualization' }
@@ -226,6 +222,10 @@ satellite_content_credentials:
     content: "{{ lookup('url', 'http://mirror.init7.net/fedora/epel/RPM-GPG-KEY-EPEL-10', split_lines=False) }}"
 
 satellite_products:
+  - name: Red Hat Ansible Automation Platform
+    repository_sets:
+      - name: Red Hat Ansible Automation Platform 2.6 for RHEL 10 x86_64 (RPMs)
+
   - name: Red Hat Enterprise Linux for x86_64
     repository_sets:
       - name: Red Hat Enterprise Linux 10 for x86_64 - AppStream (RPMs)
@@ -346,10 +346,3 @@ satellite_products:
     repository_sets:
       - name: Advanced Virtualization for RHEL 8 x86_64 (RPMs)
 
-  - name: Red Hat Ansible Automation Platform
-    repository_sets:
-      - name: Red Hat Ansible Automation Platform 2.4 for RHEL 9 x86_64 (RPMs)
-      - name: Red Hat Ansible Automation Platform 2.5 for RHEL 9 x86_64 (RPMs)
-      - name: Red Hat Ansible Automation Platform 2.4 for RHEL 8 x86_64 (RPMs)
-      - name: Red Hat Ansible Automation Platform 2.5 for RHEL 8 x86_64 (RPMs)
-      - name: Red Hat Automation Hub 4.2 for RHEL 8 x86_64 (RPMs)
