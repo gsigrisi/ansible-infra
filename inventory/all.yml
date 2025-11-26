@@ -24,20 +24,10 @@ all:
     bombino.mgmt.zg.pinguozzo.com:
     verdeca.mgmt.zg.pinguozzo.com:
     aleatico.mgmt.zg.pinguozzo.com:
-    sm01.mgmt.zg.pinguozzo.com:
-      infra: yes
-    sm02.mgmt.zg.pinguozzo.com:
-      infra: yes
-    sm03.mgmt.zg.pinguozzo.com:
-      infra: yes
     virt-console:
       ansible_host: virt-console.mgmt.zg.pinguozzo.com
       env: mgmt
       infra: yes
-    satellite-upstream:
-      ansible_host: sat-upstream.mgmt.zg.pinguozzo.com
-      env: upstream
-      infra: no
     satellite-mgmt:
       ansible_host: satellite.mgmt.zg.pinguozzo.com
       env: mgmt
@@ -73,15 +63,6 @@ all:
             ansible_connection: local
           hosts:
             satellite-mgmt:
-        upstream:
-          vars:
-            ansible_connection: local
-          hosts:
-            satellite-upstream:
         aap:
           hosts:
-            aap-gw1.apps.pinguozzo.com:
-            aap-gw2.apps.pinguozzo.com:
-            aap-controller1.apps.pinguozzo.com:
-            aap-controller2.apps.pinguozzo.com:
-...
+            aap.mgmt.zg.pinguozzo.com:
