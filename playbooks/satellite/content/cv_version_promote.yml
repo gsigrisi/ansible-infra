@@ -4,25 +4,25 @@
   gather_facts: false
 
   tasks:
-    - name: "Promote content views"
-      redhat.satellite.content_view_version:
-        username: "{{ satellite_username | default(omit) }}"
-        password: "{{ satellite_password | default(omit) }}"
-        server_url: "{{ satellite_server_url | default(omit) }}"
-        validate_certs: "{{ satellite_validate_certs | default(omit) }}"
-        organization: "{{ satellite_organization }}"
-        content_view: "{{ content_view.name | default(content_view.content_view) | default(content_view) }}"
-        description: "{{ content_view.description | default(omit) }}"
-        version: "{{ content_view.version | default(omit) }}"
-        lifecycle_environments: "{{ content_view.lfe | default(omit) }}"
-        force_promote: "{{ content_view.force_promote | default(omit) }}"
-        force_yum_metadata_regeneration: "{{ content_view.force_yum_metadata_regeneration | default(omit) }}"
-        current_lifecycle_environment: "{{ content_view.current_lifecycle_environment | default(omit) }}"
-      async: "{{ satellite_content_view_publish_async | default(omit) }}"
-      poll: "{{ satellite_content_view_publish_poll | default(omit) }}"
-      loop: "{{ cv }}"
-      loop_control:
-        loop_var: "content_view"
+#    - name: "Promote content views"
+#      redhat.satellite.content_view_version:
+#        username: "{{ satellite_username | default(omit) }}"
+#        password: "{{ satellite_password | default(omit) }}"
+#        server_url: "{{ satellite_server_url | default(omit) }}"
+#        validate_certs: "{{ satellite_validate_certs | default(omit) }}"
+#        organization: "{{ satellite_organization }}"
+#        content_view: "{{ content_view.name | default(content_view.content_view) | default(content_view) }}"
+#        description: "{{ content_view.description | default(omit) }}"
+#        version: "{{ content_view.version | default(omit) }}"
+#        lifecycle_environments: "{{ content_view.lfe | default(omit) }}"
+#        force_promote: "{{ content_view.force_promote | default(omit) }}"
+#        force_yum_metadata_regeneration: "{{ content_view.force_yum_metadata_regeneration | default(omit) }}"
+#        current_lifecycle_environment: "{{ content_view.current_lifecycle_environment | default(omit) }}"
+#      async: "{{ satellite_content_view_publish_async | default(omit) }}"
+#      poll: "{{ satellite_content_view_publish_poll | default(omit) }}"
+#      loop: "{{ cv }}"
+#      loop_control:
+#        loop_var: "content_view"
 
     - name: "Promote composite content views"
       redhat.satellite.content_view_version:
