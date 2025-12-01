@@ -1,17 +1,11 @@
 ---
-- name: install RHEL/Fedora web console (cockpit)
+- name: Manage the RHEL web console
   hosts: all
-  roles:
-    - redhat.rhel_system_roles.cockpit
-  vars:
-    cockpit_packages: default
-  tags: cockpit
-
-- name: configure firewall for web console
-  hosts: all
-  roles:
-    - redhat.rhel_system_roles.firewall
-  vars:
-    firewall:
-      service: cockpit
-  tags: cockpit
+  tasks:
+    - name: Install RHEL web console
+      ansible.builtin.include_role:
+        name: redhat.rhel_system_roles.cockpit
+      vars:
+        cockpit_packages: default
+        cockpit_manage_selinux: true
+        cockpit_manage_firewall: true
