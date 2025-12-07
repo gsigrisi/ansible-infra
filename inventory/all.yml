@@ -52,10 +52,6 @@ all:
           vars:
             ansible_user: rex
             ansible_python_interpreter: auto
-        he-backup:
-          vars:
-            ansible_user: rex
-            ansible_python_interpreter: auto
           hosts:
             virt-console.mgmt.zg.pinguozzo.com
         mgmt:

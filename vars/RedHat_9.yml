@@ -1,21 +1,21 @@
 ---
 rhc_auth:
-  hostgroup: "ESX/ESX RHEL9 NET_apps"
+  hostgroup: "ESX/RHEL9_NET_MGMT"
   activation_keys:
     keys:
       - "ak-rhel9-vmware"
 
-# hg_name: "{{ hg | default('ESX/ESX RHEL9 NET_apps') }}"
-hg_name: "{{ hg | default('ESX/RHEL9') }}"
-hg_name_short: "RHEL9"
+hg_name: "{{ hg | default('ESX/RHEL9_NET_MGMT') }}"
+hg_name_short: "RHEL9_NET_MGMT"
 net: "{{ network | default('NET_apps') }}"
-hg_name_full: "{{ hg_name  }} {{ net }}"
-os: "{{ operatingsystem | default('RedHat 9.0') }}"
-# compute_profile: "VMware Medium RHEL9 ESX NET_apps"
-compute_profile: "VMware Medium {{ hg_name_short }} {{ net }}"
-ks: "Red Hat Enterprise Linux 9 for x86_64 - BaseOS Kickstart 9.0"
-ptable: "Kickstart default pinguozzo"
-cv: "ccv-rhel9_soe"
+os: "{{ operatingsystem | default('RedHat 9.7') }}"
+compute_profile: "ESX Medium Generic"
+ks: "Red Hat Enterprise Linux 9 for x86_64 - BaseOS Kickstart 9.7"
+ptable: "Kickstart default EFI"
+cv: "ccv-rhel9"
+rhsm_activationkey: ak-rhel9
+rhsm_force_register: yes
+rhsm_org: "{{ satellite_organization }}"
 
 satellite_repos:
   - rhel-9-for-x86_64-baseos-rpms

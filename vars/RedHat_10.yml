@@ -1,17 +1,17 @@
 ---
 rhc_auth:
-  hostgroup: "ESX/RHEL8_NET_MGMT"
+  hostgroup: "ESX/RHEL10_NET_MGMT"
   activation_keys:
     keys:
-      - "ak-rhel8-vmware"
+      - "ak-rhel10"
 
 net: "{{ network | default('NET_MGMT') }}"
-hg_name: "{{ hg | default('ESX/RHEL8_NET_MGMT') }}"
-hg_name_short: "RHEL8_NET_MGMT"
-os: "{{ operatingsystem | default('RHEL 8.10') }}"
-ks: "Red Hat Enterprise Linux 8 for x86_64 - BaseOS Kickstart 8.10"
+hg_name: "{{ hg | default('ESX/RHEL10_NET_MGMT') }}"
+hg_name_short: "RHEL10_NET_MGMT"
+os: "{{ operatingsystem | default('RedHat 10.0') }}"
+ks: "Red Hat Enterprise Linux 10 for x86_64 - BaseOS Kickstart 10.0"
 ptable: "Kickstart default EFI"
-cv: "ccv-rhel8"
+cv: "ccv-rhel10"
 compute_profile: "ESX Medium Generic"
 rhsm_activationkey: ak-rhel8
 rhsm_force_register: yes

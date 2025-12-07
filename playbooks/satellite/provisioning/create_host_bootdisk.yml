@@ -27,7 +27,7 @@
     - name: Show info
       ansible.builtin.debug:
         msg: |-
-          Hostgroup: "{{ hg_name_full }}",
+          Hostgroup: "{{ hg_name }}",
           Network: "{{ net }}",
           Ptable: "{{ ptable }}",
           OS: "{{ os }}",
@@ -49,9 +49,9 @@
             name: "{{ vm_name | default(lookup('community.general.random_pet'), true) ~ (vm_name is defined and num_instances | int > 1 )|ternary('-' + item, '') ~ '.' ~ domain_name }}"
             state: present
             build: true
-            hostgroup: "{{ hg_name_full }}"
+            hostgroup: "{{ hg_name }}"
             compute_resource: "VMware"
-            compute_profile: "{{ compute_profile | default('2-Medium Generic') }}"
+            compute_profile: "{{ compute_profile | default('ESX Medium Generic') }}"
             compute_attributes:
               start: "1"
             ptable: "{{ ptable }}"
