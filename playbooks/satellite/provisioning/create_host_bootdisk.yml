@@ -6,14 +6,12 @@
   vars:
     notify_via_telegram: true
     os_major: "{{ os_major | default('9') }}"
-    env: "{{ env | default('env') }}"
 
   pre_tasks:
     - name: Set platform/version/env specific variables
       include_vars: "{{ item }}"
       loop:
         - "{{ playbook_dir }}/../../../vars/RedHat_{{ os_major | default('9') }}.yml"
-        - "{{ playbook_dir }}/../../../vars/satellite-{{ hostvars[inventory_hostname].env | default('mgmt') }}.yml"
       when: item is file
 
     - name: Set login/env specific variables
