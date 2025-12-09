@@ -55,6 +55,7 @@
           - jmespath
           - requests
         # - Pyvmomi (duplicated - included in community.vmware)
+          - pyvmomi==8.0.2
         collections:
           - name: ansible.controller
           - name: awx.awx
