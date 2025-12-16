@@ -68,8 +68,9 @@
             vms: "{{ output | community.general.json_query('results[*].entity.hosts[*].name') | flatten }} "
 
         - name: Print new host(s) fqdn
-          debug:
-            msg: "{{ item }}"
+          ansible.builtin.debug:
+            msg: |-
+              "{{ item }}"
           loop: "{{ vms }}"
 
         - name: Move vm to corresponding folder
@@ -81,7 +82,8 @@
             name: "{{ item }}"
             dest_folder: "/DC1/vm/KNA/RHEL{{ os_major }}"
             validate_certs: false
-          loop: "{{ vms }}"
+          loop: 
+            - "{{ vms }}"
           delegate_to: localhost
 
         - name: Notify via telegram
