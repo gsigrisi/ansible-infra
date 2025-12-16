@@ -65,13 +65,13 @@
 
         - name: Set vms list
           set_fact:
-            vms: "{{ output | community.general.json_query('results[*].entity.hosts[*].name') | flatten }} "
+            vms: "{{ output | community.general.json_query('results[*].entity.hosts[*].name') | flatten }}"
 
         - name: Print new host(s) fqdn
           ansible.builtin.debug:
             msg: |-
               "{{ item }}"
-          loop: "{{ vms | flatten(levels=1) }}" }}"
+          loop: "{{ vms | flatten(levels=1) }}"
 
         - name: Move vm to corresponding folder
           community.vmware.vmware_guest_move:
@@ -82,7 +82,7 @@
             name: "{{ item }}"
             dest_folder: "/DC1/vm/KNA/RHEL{{ os_major }}"
             validate_certs: false
-          loop: "{{ vms | flatten(levels=1) }}" }}"
+          loop: "{{ vms | flatten(levels=1) }}"
           delegate_to: localhost
 
         - name: Notify via telegram
