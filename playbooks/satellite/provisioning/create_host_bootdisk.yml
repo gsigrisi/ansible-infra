@@ -71,8 +71,7 @@
           ansible.builtin.debug:
             msg: |-
               "{{ item }}"
-          loop: 
-            - "{{ vms }}"
+          loop: "{{ vms | flatten(levels=1) }}" }}"
 
         - name: Move vm to corresponding folder
           community.vmware.vmware_guest_move:
@@ -83,8 +82,7 @@
             name: "{{ item }}"
             dest_folder: "/DC1/vm/KNA/RHEL{{ os_major }}"
             validate_certs: false
-          loop: 
-            - "{{ vms }}"
+          loop: "{{ vms | flatten(levels=1) }}" }}"
           delegate_to: localhost
 
         - name: Notify via telegram
