@@ -27,9 +27,13 @@ all:
        terlicium:
          hosts:
            terlicium.wg.pinguozzo.com
+             ansible_ssh_host: 10.0.0.10
+             ansible_user: rex
        comski:
          hosts:
            comski.wg.pinguozzo.com
+             ansible_ssh_host: 10.0.0.6
+             ansible_user: rex
        gva:
          hosts:
            gva.wg.pinguozzo.com
