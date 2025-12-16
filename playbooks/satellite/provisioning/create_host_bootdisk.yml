@@ -71,7 +71,8 @@
           ansible.builtin.debug:
             msg: |-
               "{{ item }}"
-          loop: "{{ vms }}"
+          loop: 
+            - "{{ vms }}"
 
         - name: Move vm to corresponding folder
           community.vmware.vmware_guest_move:
