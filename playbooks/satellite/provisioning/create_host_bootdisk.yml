@@ -24,14 +24,14 @@
 
     - name: Show info
       ansible.builtin.debug:
-        msg: |-
-          Hostgroup: "{{ hg_name }}",
-          Network: "{{ net }}",
-          Ptable: "{{ ptable }}",
-          OS: "{{ os }}",
-          Kickstart_repository: "{{ ks }}",
-          Content_view: "{{ cv }}",
-          Content_source: "{{ capsule_server }}"
+        msg: |
+             "'Hostgroup': {{ hg_name }},
+             'Network': {{ net }},
+             'Ptable': {{ ptable }},
+             'OS': {{ os }},
+             'Kickstart_repository': {{ ks }},
+             'Content_view': {{ cv }},
+             'Content_source': {{ capsule_server }}"
 
   tasks:
     - name: Create host(s)
