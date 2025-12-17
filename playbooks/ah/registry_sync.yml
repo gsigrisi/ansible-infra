@@ -18,7 +18,7 @@
     ah_configuration_async_timeout: 300
     ah_ee_registries:
       - name: "Red Hat Registry"
-        wait: false
+        wait: true
         sync: true
     
   pre_tasks:
