@@ -6,7 +6,7 @@
     - infra.ah_configuration
 
   vars_files:
-    - "{{ playbook_dir }}/../../vaults/{{ env }}-vault.yml"
+    - "{{ playbook_dir }}/../../vaults/{{ hostvars[inventory_hostname].env }}-vault.yml"
 
   vars:
     ah_configuration_collection_repository_sync_async_retries: 1200

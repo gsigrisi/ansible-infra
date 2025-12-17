@@ -1,29 +1,26 @@
 ---
 all:
   vars:
-    set_disconnected: false
-    set_sync: false
-    set_cv: false
-    set_environments: false
-    set_lvm: false
-    set_installer: false
     set_3rdparty: false
-    set_manifest: false
-    set_sync_repos: false
-    set_global: false
-    set_locations: false
+    set_ak: false
+    set_cv: false
+    set_disconnected: false
+    set_environments: false
+    set_force_promote: true
     set_force_register: false
     set_fresh_install: false
+    set_global: false
+    set_installer: false
+    set_locations: false
+    set_lvm: false
+    set_manifest: false
     set_repos: false
+    set_sync: false
     set_sync_plan: false
-    set_ak: false
-    set_force_promote: true
+    set_sync_repos: false
     location: CH
     timezone: Europe\Zurich
   hosts:
-    bombino.mgmt.zg.pinguozzo.com:
-    verdeca.mgmt.zg.pinguozzo.com:
-    aleatico.mgmt.zg.pinguozzo.com:
     virt-console:
       ansible_host: virt-console.mgmt.zg.pinguozzo.com
       env: mgmt
@@ -39,15 +36,6 @@ all:
   children:
     INFRA:
       children:
-        ceph:
-          vars:
-            ansible_become: true
-            ansible_user: rex
-            ansible_python_interpreter: auto
-          hosts:
-            bombino.mgmt.zg.pinguozzo.com:
-            verdeca.mgmt.zg.pinguozzo.com:
-            aleatico.mgmt.zg.pinguozzo.com:
         rhvh:
           vars:
             ansible_user: rex

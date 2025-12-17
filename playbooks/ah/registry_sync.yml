@@ -1,12 +1,12 @@
 ---
-- name: Sync pah ee registry
+- name: Sync PAH EE registry
   hosts: "{{ targeted_host| default('localhost') }}"
   gather_facts: false
   collections:
     - infra.ah_configuration
 
   vars_files:
-    - "{{ playbook_dir }}/../../vaults/{{ env }}-vault.yml"
+    - "{{ playbook_dir }}/../../vaults/{{ hostvars[inventory_hostname].env }}-vault.yml"
 
   vars:
     ah_host: "{{ vaulted_ah_host }}"
