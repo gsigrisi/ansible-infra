@@ -14,7 +14,8 @@
     ah_password: "{{ vaulted_ee_base_registry_password }}"
     ah_validate_certs: false 
     ah_configuration_async_retries: 1200
-    ah_configuration_async_delay: 300 
+    ah_configuration_async_delay: 10 
+    ah_configuration_async_timeout: 300
     ah_ee_registries:
       - name: "Red Hat Registry"
         wait: false
