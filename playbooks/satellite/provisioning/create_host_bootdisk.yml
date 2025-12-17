@@ -22,16 +22,16 @@
         __vars_file: "{{ playbook_dir }}/../../../vaults/{{ hostvars[inventory_hostname].env }}-vault.yml"
       when: __vars_file is file
 
-    - name: Show info
+    - name: Set vm_info
       ansible.builtin.debug:
         msg: |
-             "'Hostgroup': {{ hg_name }},
+             'Hostgroup': {{ hg_name }},
              'Network': {{ net }},
              'Ptable': {{ ptable }},
              'OS': {{ os }},
              'Kickstart_repository': {{ ks }},
              'Content_view': {{ cv }},
-             'Content_source': {{ capsule_server }}"
+             'Content_source': {{ capsule_server }}
 
   tasks:
     - name: Create host(s)
@@ -61,7 +61,7 @@
             content_view: "{{ cv }}"
             lifecycle_environment: "LAB"
           register: output
-          with_sequence: start=1 end="{{ num_instances|default(1) }}"
+          with_sequence: start=1 end="{{ num_instances | default(1) }}"
 
         - name: Set vms list
           set_fact:
