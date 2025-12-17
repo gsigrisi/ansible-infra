@@ -1,0 +1,76 @@
+- name: Playbook to create custom EE
+  hosts: "{{ targeted_host | default('localhost') }}"
+  gather_facts: false
+
+  vars_files:
+    - "{{ playbook_dir }}/../../vaults/{{ env }}-vault.yml"
+
+  vars:
+    ee_aap_version: 2.6
+    ee_builder_dir_clean: false
+    ee_update_base_images: false
+    ee_base_image: registry.redhat.io/ansible-automation-platform-26/ee-minimal-rhel9:latest
+    ee_prune_images: false
+    ee_pull_collections_from_hub: true
+    ee_ah_host: "{{ vaulted_ah_host }}"
+    ee_ah_token: "{{ vaulted_ah_token }}"
+    ee_reg_credential: Internal registry
+    ee_registry_dest: "{{ vaulted_ee_registry_dest }}"
+    ee_registry_username: "{{ vaulted_ee_base_registry_username | default(omit, true) }}"
+    ee_registry_password: "{{ vaulted_ee_base_registry_password | default(omit, true) }}"
+    ee_validate_certs: false
+    ee_verbosity: 3
+
+
+    ee_build_arg_defaults:
+       ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: -vv --pre -c
+
+    ee_list:
+      - name: custom_ee
+        alt_name: Custom EE
+        tags:
+          - ansible-build-latest
+        dependencies:
+          system:
+            - libcurl-devel [platform:rpm]
+          python:
+            - awxkit
+            - dnspython
+            - jmespath
+            - petname
+            - requests
+          galaxy:
+            collections:
+              - awx.awx
+              - ansible.posix
+              - ansible.controller
+              - community.general
+              - community.vmware
+              - infra.ah_configuration
+              - infra.controller_configuration
+              - infra.ee_utilities
+              - redhat.rhel_system_roles
+              - redhat.satellite
+              - redhat.satellite_operations
+              - vmware.vmware_rest
+
+          python_interpreter:
+            package_system: python3.12
+            python_path: /usr/bin/python3.12
+          ansible_core:
+            package_pip: ansible-core>=2.16,<2.17
+          ansible_runner:
+            package_pip: ansible-runner
+         
+        build_steps:
+          append_base:
+            - RUN $PYCMD -V
+            - RUN $PYCMD -m pip install -U pip
+        options:
+          package_manager_path: /usr/bin/microdnf
+        images:
+          base_image:
+            name: registry.redhat.io/ansible-automation-platform-26/ee-minimal-rhel9:latest
+  roles:
+    - infra.ee_utilities.ee_builder
+...

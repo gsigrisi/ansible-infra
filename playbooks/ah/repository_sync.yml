@@ -1,8 +1,7 @@
 ---
-- name: sync pah repositories
-  hosts: localhost
-  connection: local
-  gather_facts: no
+- name: Sync PAH repositories
+  hosts: "{{ targeted_host| default('localhost') }}"
+  gather_facts: false
   collections:
     - infra.ah_configuration
 
@@ -20,7 +19,7 @@
         timeout: 1200
     
   pre_tasks:
-    - name: create a new token using controller username/password
+    - name: Create a new token using controller username/password
       ansible.controller.token:
         description: 'Creating token to test controller jobs'
         scope: "write"
@@ -29,7 +28,6 @@
         controller_host: "{{ controller_hostname }}"
         controller_username: "{{ controller_username }}"
         controller_password: "{{ controller_password }}"
-      when: not controller_token
 
   roles:
     - {role: collection_repository_sync }

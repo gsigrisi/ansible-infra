@@ -1,8 +1,7 @@
 ---
-- name: sync pah ee registry
-  hosts: localhost
-  connection: local
-  gather_facts: no
+- name: Sync pah ee registry
+  hosts: "{{ targeted_host| default('localhost') }}"
+  gather_facts: false
   collections:
     - infra.ah_configuration
 
@@ -15,7 +14,7 @@
     ah_password: "{{ vaulted_ee_base_registry_password }}"
     ah_validate_certs: false 
     ah_configuration_async_retries: 1200
-    ah_configuration_async_delay: 10
+    ah_configuration_async_delay: 300 
     ah_ee_registries:
       - name: "Red Hat Registry"
         wait: false
