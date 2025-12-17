@@ -21,7 +21,7 @@
   pre_tasks:
     - name: Create a new token using controller username/password
       ansible.controller.token:
-        description: 'Creating token to test controller jobs'
+        description: 'admin token for pah repositories sync'
         scope: "write"
         state: present
         validate_certs: false
