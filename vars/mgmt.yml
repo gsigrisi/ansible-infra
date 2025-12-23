@@ -147,7 +147,6 @@ satellite_content_views:
       - { name: 'Red Hat Virtualization Manager 4.4 for RHEL 8 x86_64 RPMs', product: 'Red Hat Virtualization Manager' }
       - { name: 'Red Hat Virtualization 4 Management Agents for RHEL 8 x86_64 RPMs', product: 'Red Hat Virtualization' }
       - { name: 'Advanced Virtualization for RHEL 8 x86_64 RPMs', product: 'Red Hat Enterprise Linux Advanced Virtualization' }
-      - { name: 'Red Hat Ceph Storage Tools 4 for RHEL 8 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Red Hat CodeReady Linux Builder for RHEL 8 x86_64 RPMs 8', product: 'Red Hat CodeReady Linux Builder for x86_64' }
       - { name: 'Red Hat Enterprise Linux 8 for x86_64 - AppStream - Telecommunications Update Service RPMs 8.6', product: 'Red Hat Enterprise Linux Server - TUS'}
       - { name: 'Red Hat Enterprise Linux 8 for x86_64 - BaseOS - Telecommunications Update Service RPMs 8.6', product: 'Red Hat Enterprise Linux Server - TUS'}
@@ -296,7 +295,6 @@ satellite_products:
       - name: Red Hat Satellite Client 6 for RHEL 10 x86_64 (RPMs)
       - name: Red Hat Satellite Maintenance 6.17 for RHEL 9 x86_64 (RPMs)
       - name: Red Hat Satellite Maintenance 6.18 for RHEL 9 x86_64 (RPMs)
-      - name: Red Hat Ceph Storage Tools 4 for RHEL 8 x86_64 (RPMs)
       - name: Red Hat Ceph Storage Tools 5 for RHEL 9 x86_64 (RPMs)
       - name: Red Hat Ceph Storage Tools 6 for RHEL 9 x86_64 (RPMs)
       - name: Red Hat Ceph Storage Tools 7 for RHEL 9 x86_64 (RPMs)
