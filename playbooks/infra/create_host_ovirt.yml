@@ -1,0 +1,92 @@
+---
+- name: oVirt infra
+  hosts: "{{ targeted_host| default('localhost') }}"
+  gather_facts: false
+
+  vars_files:
+    - "{{ playbook_dir }}/../../vaults/{{ env }}-vault.yml"
+
+  pre_tasks:
+    - name: Set facts
+      ansible.builtin.set_fact:
+        vm_name: "{{ lookup('community.general.random_pet') }}"
+        #vm_name: "{{ lookup('community.general.random_pet') ~ '.' ~ domain_name }}"
+        mac_address: "{{ '56:6f:30' | community.general.random_mac }}"
+
+    - name: 'Ensure Discovery Rule'
+      redhat.satellite.discovery_rule:
+        name: "{{ vm_name }}-discovery_rule"
+        search: 'mac = "{{ mac_address }}"'
+        hostgroup: 'RHV-4.5/RHEL{{ os_major }}_NET_MGMT'
+        hostname: "{{ vm_name }}.{{ domain_name }}"
+        max_count: 1
+        username: "{{ satellite_username | default(omit) }}"
+        password: "{{ satellite_password | default(omit) }}"
+        server_url: "{{ satellite_server_url | default(omit) }}"
+        validate_certs: "{{ satellite_validate_certs | default(omit) }}"
+        organizations: "{{ satellite_organization }}"
+        locations: "{{ satellite_location }}"
+
+    - name: Print info
+      ansible.builtin.debug:
+        msg: System {{ vm_name }} has mac_address {{ mac_address }}
+
+    - name: Add '{{ vm_name }}' to post_install group
+      ansible.builtin.add_host:
+        hostname: "{{ vm_name }}.{{ domain_name }}"
+        groups: post_install
+
+    - name: Show host in post_install group
+      ansible.builtin.debug: var=groups['post_install']
+
+  tasks:
+    - name: Import-role ovirt.vm_infra
+      ansible.builtin.import_role:
+        name: ovirt.ovirt.vm_infra
+      vars:
+        debug_vm_create: true
+        vms:
+          - name: "{{ vm_name }}.{{ domain_name }}"
+            cluster: Default
+            memory: 4GiB
+            cpu_cores: 2
+            cores: 2
+            state: running
+            template: Default
+            graphical_console:
+              protocol:
+                - vnc
+            boot_devices:
+              - network
+            nics:
+              - name: nic1
+                mac_address: "{{ mac_address }}"
+  post_tasks:
+    - name: Add targeted vm to post_install inventory group
+      ansible.builtin.add_host:
+        hostname: "{{ vm_name }}.{{ domain_name }}"
+        groups: post_install
+
+    - name: Check if {{ vm_name }}.{{ domain_name }} has been created
+      redhat.satellite.host_info:
+        username: "{{ satellite_username | default(omit) }}"
+        password: "{{ satellite_password | default(omit) }}"
+        server_url: "{{ satellite_server_url | default(omit) }}"
+        validate_certs: "{{ satellite_validate_certs | default(omit) }}"
+        name: "{{ item }}"
+      register: host_search_result
+      loop: "{{ groups['post_install'] }}"
+
+    - name: Show host_search result
+      ansible.builtin.debug:
+        msg: "Host {{ vm_name }}.{{ domain_name }} has been created!"
+      when: host_search_result is ansible.builtin.success
+
+#    - name: Remove Discovery Rule
+#      theforeman.foreman.discovery_rule:
+#        username: "{{ satellite_username | default(omit) }}"
+#        password: "{{ satellite_password | default(omit) }}"
+#        server_url: "{{ satellite_server_url | default(omit) }}"
+#        validate_certs: "{{ satellite_validate_certs | default(omit) }}"
+#        name: "{{ vm_name }}-discovery_rule"
+#        state: 'absent'

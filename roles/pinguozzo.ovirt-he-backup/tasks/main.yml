@@ -1,12 +1,12 @@
 ---
-- name: include vars
+- name: Include vars
   include_vars: "{{ item }}.yml"
   loop:
     - engine_vars
     - telegram
     - nfs
 
-- name: "set backup_filename fact"
+- name: Set backup_filename fact
   set_fact:
     backup_filename: "{{ nfs_mount }}/{{ nfs_path }}/he-backup-{{ ansible_date_time.date }}"
 
@@ -16,51 +16,52 @@
     state: directory
     mode: '0755'
 
-- name: "ensure NFS Backup share is mounted"
-  mount: name={{nfs_mount}} src={{nfs_server}}:/{{ nfs_export }} fstype=nfs state=mounted
+- name: Ensure NFS Backup share is mounted
+  ansible.posix.mount: name={{ nfs_mount }} src={{ nfs_server }}:/{{ nfs_export }} fstype=nfs state=mounted
 
-- name: "check if backup already run"
+- name: Check if backup already run
   stat:
     path: "{{ backup_filename }}"
   register: he_backup_done
 
-- name: "run he backup Full"
-  shell: engine-backup --scope=all --mode=backup --file="{{ backup_filename }}" --log=/var/log/he-backup-"{{ ansible_date_time.date }}".log
+- name: Run he backup Full
+  ansible.builtin.shell: engine-backup --scope=all --mode=backup --file="{{ backup_filename }}" --log=/var/log/he-backup-"{{ ansible_date_time.date }}".log
   register: he_backup
-  ignore_errors: False
+  ignore_errors: false
   when: he_backup_done.stat.path is not defined
 
-- name: "get backup status"
-  debug: msg="Backup completed successfully"
+- name: Get backup status
+  ansible.builtin.debug: msg="Backup completed successfully"
   when: he_backup is defined and 'rc' in he_backup and he_backup.rc == 0
 
-- name: "notify via telegram"
+- name: Notify via telegram
   community.general.telegram:
     token: "{{ pinguobot_token }}"
     api_args:
       chat_id: "{{ pinguobot_chatid }}"
-      text: "ovirt-engine backup completed successfully"
+      #text: "{{ ovirt-engine backup completed successfully"
+      text: "{% if he_backup is defined and 'rc' in he_backup and 'he_backup.rc' == 0 %}ovirt-engine backup completed successfully on {{ ansible_date_time.date }} {% else %}ovirt-backup skipped on  {{ ansible_date_time.date }}{% endif %}"
       parse_mode: "markdown"
       disable_web_page_preview: true
       disable_notification: true
-  when: he_backup is defined and 'rc' in he_backup and he_backup.rc == 0
+      #when: he_backup is defined and 'rc' in he_backup and he_backup.rc == 0
 
-- name: "find backups older then {{ retention_days }}"
+- name: "Find backups older then {{ retention_days }}"
   find:
     paths: "{{ nfs_mount }}/{{ nfs_path }}/"
     age: "{{ retention_days }}"
-    recurse: yes
+    recurse: true
   register: files_to_delete
 
-- name: "he backup files to be deleted"
-  debug: var=item.path
+- name: "He backup files to be deleted"
+  ansible.builtin.debug: var=item.path
   with_items: "{{ files_to_delete.files }}"
 
-- name: "delete old he backup files"
+- name: Delete old he backup files
   file:
     path: "{{ item.path }}"
     state: absent
   with_items: "{{ files_to_delete.files }}"
 
-- name: "umount nfs Backup share"
-  mount: name={{ nfs_mount }} src={{nfs_server}}:/{{ nfs_export }} fstype=nfs state=unmounted
+- name: "Umount nfs Backup share"
+  ansible.posix.mount: name={{ nfs_mount }} src={{ nfs_server }}:/{{ nfs_export }} fstype=nfs state=unmounted

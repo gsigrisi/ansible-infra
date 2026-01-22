@@ -1,8 +1,8 @@
 ---
 controller_templates:
-- name: "pinguozzo-satellite_operations: host delete"
+- name: "infra: delete host"
   description:
-  credentials: "pinguozzo: vault"  
+  credentials: "vault"  
   job_type: run
   inventory: 5
   project: 16

@@ -35,3 +35,6 @@ Thumbs.db
 
 # Installers
 installers/
+
+# Python venv
+venvs
