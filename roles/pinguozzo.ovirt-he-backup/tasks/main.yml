@@ -40,11 +40,14 @@
     api_args:
       chat_id: "{{ pinguobot_chatid }}"
       #text: "{{ ovirt-engine backup completed successfully"
-      text: "{% if he_backup is defined and 'rc' in he_backup and 'he_backup.rc' == 0 %}ovirt-engine backup completed successfully on {{ ansible_date_time.date }} {% else %}ovirt-backup skipped on  {{ ansible_date_time.date }}{% endif %}"
+      text: "{{ msg }}"
       parse_mode: "markdown"
       disable_web_page_preview: true
       disable_notification: true
       #when: he_backup is defined and 'rc' in he_backup and he_backup.rc == 0
+  vars:
+    msg: "{% if he_backup is defined and 'rc' in he_backup and 'he_backup.rc' == 0 %}ovirt-engine backup completed successfully on {{ ansible_date_time.date }} {% else %}ovirt-backup skipped on  {{ ansible_date_time.date }}{% endif %}"
+
 
 - name: "Find backups older then {{ retention_days }}"
   find:
