@@ -13,7 +13,7 @@
         #vm_name: "{{ lookup('community.general.random_pet') ~ '.' ~ domain_name }}"
         mac_address: "{{ '56:6f:30' | community.general.random_mac }}"
 
-    - name: 'Ensure Discovery Rule'
+    - name: Ensure Discovery Rule
       redhat.satellite.discovery_rule:
         name: "{{ vm_name }}-discovery_rule"
         search: 'mac = "{{ mac_address }}"'

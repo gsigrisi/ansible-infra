@@ -7,5 +7,5 @@
     retention_days: 1w
 
   tasks:
-    -  ansible.builtin.include_role:
-         name: "{{ playbook_dir }}/../../roles/pinguozzo.ovirt-he-backup"
+    - ansible.builtin.include_role:
+        name: "{{ playbook_dir }}/../../roles/pinguozzo.ovirt-he-backup"

@@ -8,7 +8,7 @@ rhc_auth:
 hg_name: "{{ hg | default('ESX/RHEL9_NET_MGMT') }}"
 hg_name_short: "RHEL9_NET_MGMT"
 net: "{{ network | default('NET_apps') }}"
-os: "{{ operatingsystem | default('RedHat 9.7') }}"
+os: "{{ operatingsystem | default('RHEL 9.7') }}"
 compute_profile: "ESX Medium Generic"
 ks: "Red Hat Enterprise Linux 9 for x86_64 - BaseOS Kickstart 9.7"
 ptable: "Kickstart default EFI"

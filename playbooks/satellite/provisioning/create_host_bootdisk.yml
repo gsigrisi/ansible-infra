@@ -73,12 +73,30 @@
               "{{ item }}"
           loop: "{{ vms | flatten(levels=1) }}"
 
+        - name: Create a VM folder on given datacenter
+          community.vmware.vcenter_folder:
+            hostname: '{{ vcenter_hostname }}'
+            username: '{{ vcenter_username }}'
+            password: '{{ vcenter_password }}'
+            datacenter: "{{ vcenter_datacenter }}"
+            folder_name: "RHEL{{ item }}"
+            validate_certs: false
+            folder_type: vm
+            parent_folder: KNA
+            state: present
+          with_items:
+            - 8
+            - 9
+            - 10
+          register: vm_folder_creation_result
+          delegate_to: localhost
+
         - name: Move vm to corresponding folder
           community.vmware.vmware_guest_move:
             hostname: "{{ vcenter_hostname }}"
             username: "{{ vcenter_username }}"
             password: "{{ vcenter_password }}"
-            datacenter: DC1
+            datacenter: "{{ vcenter_datacenter }}"
             name: "{{ item }}"
             dest_folder: "/DC1/vm/KNA/RHEL{{ os_major }}"
             validate_certs: false
