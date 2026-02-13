@@ -1,0 +1,52 @@
+---
+- name: Playbook to configure ansible controller post installation
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  collections:
+    - ansible.platform
+
+  vars_files:
+    - "{{ playbook_dir }}/../../vaults/{{ env }}-vault.yml"
+
+  module_defaults:
+    ansible.platform.user:
+      aap_hostname: "{{ controller_hostname }}"
+      aap_username: "{{ controller_username }}"
+      aap_password: "{{ controller_password }}"
+      aap_validate_certs: false
+
+    ansible.platform.token:
+      aap_hostname: "{{ controller_hostname }}"
+      aap_username: "{{ controller_username }}"
+      aap_password: "{{ controller_password }}"
+      aap_validate_certs: false
+
+  pre_tasks:
+    - name: Include vars from controller_configs directory
+      include_vars:
+        dir: ../../configs
+        files_matching: users_config.yml
+        extensions: ["yml"]
+    
+#    - name: Create a new token using username/password
+#      ansible.platform.token:
+#        description: '{{ token_description| default(omit) }}'
+#        scope: "write"
+#        state: present
+
+  tasks:
+    - name: Add/Remove user
+      ansible.platform.user:
+        username: "{{ __controller_user_accounts_item.user | default(__controller_user_accounts_item.username) | mandatory }}"
+        password: "{{ __controller_user_accounts_item.password | default(__controller_user_accounts_item.password) | mandatory }}"
+        email: "{{ __controller_user_accounts_item.email | default(__controller_user_accounts_item.email) | mandatory }}"
+        first_name: "{{ __controller_user_accounts_item.first_name | default(__controller_user_accounts_item.first_name) | mandatory }}"
+        last_name: "{{ __controller_user_accounts_item.last_name | default(__controller_user_accounts_item.last_name) | mandatory }}"
+        state: "{{ __controller_user_accounts_item.state | default(__controller_user_accounts_item.state) | mandatory }}"
+        superuser: "{{ __controller_user_accounts_item.is_superuser | default(__controller_user_accounts_item.is_superuser) | mandatory }}"
+        auditor: "{{ __controller_user_accounts_item.is_auditor | default(__controller_user_accounts_item.is_auditor) | mandatory }}"
+      loop: "{{ users if users is defined else controller_user_accounts }}"
+      loop_control:
+        loop_var: __controller_user_accounts_item
+
