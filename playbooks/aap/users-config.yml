@@ -2,7 +2,7 @@
 - name: Playbook to configure ansible controller post installation
   hosts: localhost
   connection: local
-  gather_facts: no
+  gather_facts: false
   collections:
     - ansible.platform
 
@@ -28,7 +28,7 @@
         dir: ../../configs
         files_matching: users_config.yml
         extensions: ["yml"]
-    
+
 #    - name: Create a new token using username/password
 #      ansible.platform.token:
 #        description: '{{ token_description| default(omit) }}'
@@ -49,4 +49,3 @@
       loop: "{{ users if users is defined else controller_user_accounts }}"
       loop_control:
         loop_var: __controller_user_accounts_item
-
