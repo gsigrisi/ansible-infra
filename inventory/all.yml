@@ -25,6 +25,7 @@ all:
       ansible_host: virt-console.mgmt.zg.pinguozzo.com
       env: mgmt
       infra: yes
+      ansible_python_interpreter: auto
     satellite-mgmt:
       ansible_host: satellite.mgmt.zg.pinguozzo.com
       env: mgmt
@@ -39,7 +40,7 @@ all:
         rhvh:
           vars:
             ansible_user: rex
-            ansible_python_interpreter: "{{ ansible_playbook_python }}"
+            ansible_python_interpreter: auto
           hosts:
             virt-console:
         mgmt:
