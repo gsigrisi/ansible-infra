@@ -61,7 +61,7 @@
             nics:
               - name: nic1
                 #mac_address: "{{ mac_address }}"
-                mac_address: {{ '56:6f:30' | community.general.random_mac }}
+                mac_address: "{{ '56:6f:30' | community.general.random_mac }}"
   post_tasks:
     - name: Add targeted vm to post_install inventory group
       ansible.builtin.add_host:
