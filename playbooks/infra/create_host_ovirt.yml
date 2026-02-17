@@ -2,6 +2,7 @@
 - name: oVirt infra
   hosts: "{{ targeted_host| default('localhost') }}"
   gather_facts: false
+  collections: ovirt.ovirt.vm_infra
 
   vars_files:
     - "{{ playbook_dir }}/../../vaults/{{ env }}-vault.yml"

@@ -11,6 +11,7 @@ collections:
   - name: infra.ee_utilities
   - name: redhat.rhel_system_roles
   - name: redhat.rhv
+  - name: ovirt.ovirt
   - name: redhat.satellite
   - name: redhat.satellite_operations
   - name: redhat_cop.ah_configuration
