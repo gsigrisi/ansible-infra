@@ -11,7 +11,6 @@
     - name: Set facts
       ansible.builtin.set_fact:
         vm_name: "{{ lookup('community.general.random_pet') }}"
-        mac_address: {{ 56:6f:30 | community.general.random_mac }}
 
     - name: Ensure Discovery Rule
       redhat.satellite.discovery_rule:
@@ -61,7 +60,8 @@
               - network
             nics:
               - name: nic1
-                mac_address: "{{ mac_address }}"
+                #mac_address: "{{ mac_address }}"
+                mac_address: {{ '56:6f:30' | community.general.random_mac }}
   post_tasks:
     - name: Add targeted vm to post_install inventory group
       ansible.builtin.add_host:
