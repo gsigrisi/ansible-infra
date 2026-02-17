@@ -12,7 +12,7 @@ os: "{{ operatingsystem | default('RHEL 8.10') }}"
 ks: "Red Hat Enterprise Linux 8 for x86_64 - BaseOS Kickstart 8.10"
 ptable: "Kickstart default EFI"
 cv: "ccv-rhel8"
-compute_profile: "ESX Medium Generic"
+compute_profile: "ESX Medium Generic RHEL 8"
 rhsm_activationkey: ak-rhel8
 rhsm_force_register: yes
 rhsm_org: "{{ satellite_organization }}"

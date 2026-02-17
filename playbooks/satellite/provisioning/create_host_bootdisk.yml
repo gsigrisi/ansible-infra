@@ -11,7 +11,7 @@
     - name: Set platform/version/env specific variables
       include_vars: "{{ item }}"
       loop:
-        - "{{ playbook_dir }}/../../../vars/RedHat_{{ os_major | default('9') }}.yml"
+        - "{{ playbook_dir }}/../../../vars/RedHat_{{ os_major }}.yml"
       when: item is file
 
     - name: Set login/env specific variables

@@ -53,6 +53,7 @@
             cores: 2
             state: running
             template: Default
+            storage_domain: UNAS-2
             graphical_console:
               protocol:
                 - vnc
