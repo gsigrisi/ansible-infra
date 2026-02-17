@@ -12,7 +12,7 @@
       ansible.builtin.set_fact:
         vm_name: "{{ lookup('community.general.random_pet') }}"
         #vm_name: "{{ lookup('community.general.random_pet') ~ '.' ~ domain_name }}"
-        mac_address: "{{ 56:6f:30 | community.general.random_mac }}"
+        mac_address: "{{ "56:6f:30" | community.general.random_mac }}"
 
     - name: Ensure Discovery Rule
       redhat.satellite.discovery_rule:
