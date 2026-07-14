@@ -5,6 +5,7 @@ collections:
   - name: ansible.controller
   - name: community.general
   - name: community.vmware
+  - name: community.hashi_vault
   - name: containers.podman
   - name: infra.ah_configuration
   - name: infra.controller_configuration
