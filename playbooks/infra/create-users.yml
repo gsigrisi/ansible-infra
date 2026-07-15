@@ -10,7 +10,7 @@
       ansible.builtin.add_host:
         hostname: "{{ item }}"
         groups: init
-        ansible_ssh_host: '{{ vm_ip }}'
+        #ansible_ssh_host: '{{ vm_ip }}'
       loop: 
         - "{{ targeted_host }}"
 
@@ -21,12 +21,53 @@
       ansible.builtin.wait_for_connection:
         timeout: 900
       loop: "{{ groups['init'] }}"
+    
+    - name: Set platform/version/env specific variables
+      include_vars: "{{ __vars_file }}"
+      loop:
+        - "{{ hostvars[inventory_hostname].env }}.yml"
+      vars:
+        __vars_file: "{{ playbook_dir }}/../../vars/{{ hostvars[inventory_hostname].env }}.yml"
+      when: __vars_file is file
+
+    - name: Set login/env specific variables
+      include_vars: "{{ __vault_file }}"
+      loop:
+        - "{{ hostvars[inventory_hostname].env }}-vault.yml"
+      vars:
+        __vault_file: "{{ playbook_dir }}/../../vaults/{{ hostvars[inventory_hostname].env }}-vault.yml"
+      when: __vault_file is file
+
+    - name: Get secret from Vault KV2 using AppRole
+      community.hashi_vault.vault_kv2_get:
+        url: "{{ hc_vault }}"
+        path: "myapp/config"                  # ← Change this to your secret path
+        engine_mount_point: "kv"              # Use "secret" if using KV v1
+        auth_method: approle
+        role_id: "{{ lookup('env', 'VAULT_APPROLE_ROLE_ID') }}"      # Pulled from credential
+        secret_id: "{{ lookup('env', 'VAULT_APPROLE_SECRET_ID') }}"  # Pulled from credential
+        validate_certs: false
+      register: vault_result
+      no_log: false
+
+    - name: Set secrets to facts
+      set_fact:
+        vaulted_username: "{{ vault_result.data.data.username }}"
+        vaulted_password: "{{ vault_result.data.data.password }}"
+        vaulted_sshkey: "{{ vault_result.data.data.ssh_keys }}"
 
 - name: create missing users
   hosts: init
   gather_facts: true
 
   pre_tasks:
+    - name: Pass secrets from localhost to remote hosts
+      set_fact:
+        vaulted_username: "{{ hostvars['localhost']['vaulted_username'] }}"
+        vaulted_password: "{{ hostvars['localhost']['vaulted_password'] }}"
+        vaulted_sshkey:  "{{ hostvars['localhost']['vaulted_sshkey'] }}"
+      no_log: true
+
     - name: include rex-users vars
       ansible.builtin.include_vars: "{{ playbook_dir }}/../../vars/rex-user.yml"
 
