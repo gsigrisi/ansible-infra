@@ -1,0 +1,93 @@
+- name: Playbook to create custom EE
+  hosts: "{{ targeted_host | default('localhost') }}"
+  gather_facts: false
+
+  vars_files:
+    - "{{ playbook_dir }}/../../vaults/{{ env }}-vault.yml"
+
+  vars:
+    ee_aap_version: 2.6
+    ee_builder_dir_clean: false
+    ee_update_base_images: false
+    ee_base_image: registry.redhat.io/ansible-automation-platform-26/ee-minimal-rhel9:latest
+    ee_prune_images: false
+    ee_pull_collections_from_hub: true
+    ee_ah_host: "{{ vaulted_ah_host }}"
+    ee_ah_token: "{{ vaulted_ah_token }}"
+    ee_reg_credential: Internal registry
+    ee_registry_dest: "{{ vaulted_ee_registry_dest }}"
+    ee_registry_username: "{{ vaulted_ee_base_registry_username | default(omit, true) }}"
+    ee_registry_password: "{{ vaulted_ee_base_registry_password | default(omit, true) }}"
+    ee_validate_certs: false
+    ee_verbosity: 3
+
+    ee_build_arg_defaults:
+       ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: -vv --pre -c
+
+    ee_list:
+      - name: custom_dev
+        alt_name: Custom DEV EE
+        tags:
+          - build-dev
+        dependencies:
+          python_interpreter:
+            python_path: "/usr/bin/python3.12"
+          system:
+            - gcc [platform:rpm]
+            - python3.12-devel [platform:rpm]
+            - pkg-config [platform:rpm]
+            - systemd-devel [platform:rpm]
+            - libxml2-devel [platform:rpm]
+            - libxslt-devel [platform:rpm]
+          python:
+            - awxkit
+            - dnspython
+            - jmespath
+            - petname
+            - requests
+            - ovirt-engine-sdk-python
+            - hvac
+          galaxy:
+            collections:
+              - name: awx.awx
+              - name: ansible.controller
+              - name: ansible.eda
+              - name: ansible.hub
+              - name: ansible.platform
+              - name: ansible.posix
+              - name: ansible.utils
+              - name: ansible.windows
+              - name: cyberark.pas
+              - name: community.general
+              - name: community.vmware
+              - name: community.hashi_vault
+              - name: containers.podman
+              - name: infra.ah_configuration
+              - name: infra.controller_configuration
+              - name: infra.ee_utilities
+              - name: kubernetes.core
+              - name: redhat.openshift
+              - name: redhat.openshift_virtualization
+              - name: redhat.rhel_system_roles
+              - name: redhat.satellite
+              - name: redhat.satellite_operations
+              - name: ovirt.ovirt
+              - name: vmware.vmware_rest
+          exclude:
+            system:
+              - openshift-clients
+
+        build_steps:
+          append_final:
+            - RUN curl -sL https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz | tar -xz -C /usr/bin
+            - RUN chmod +x /usr/bin/oc
+          prepend_base:
+            - RUN microdnf install -y python3-pip && microdnf clean all
+        options:
+          package_manager_path: /usr/bin/microdnf
+        images:
+          base_image:
+            name: registry.redhat.io/ansible-automation-platform-26/ee-minimal-rhel9:latest
+  roles:
+    - infra.ee_utilities.ee_builder
+...
