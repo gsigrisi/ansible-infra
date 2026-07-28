@@ -1,0 +1,286 @@
+---
+- name: Create Secrets in Vault + Provision Users on Remote Hosts
+  hosts: localhost
+  gather_facts: true
+  no_log: false
+  vars:
+    engine_name: "ansible-infra"
+    base_path: "users-credentials/teams"
+
+  vars_files:
+    - "{{ playbook_dir }}/../../vars/rex-user.yml"
+
+  pre_tasks:
+    - name: include rex-users vars
+      ansible.builtin.include_vars: "{{ playbook_dir }}/../../vars/rex-user.yml"
+
+  handlers:
+    - name: create_user_in_vault
+      community.hashi_vault.vault_kv2_write:
+        url: "{{ vault_url }}"
+        engine_mount_point: "{{ engine_name }}"
+        path: "{{ base_path }}/{{ item.0.name }}/{{ item.1.username }}"
+        data:
+          username: "{{ item.1.username }}"
+          password: "{{ item.1.password }}"
+          team: "{{ item.0.name }}"
+          ssh_key: "{{ item.1.ssh_key }}"
+          created_at: "{{ ansible_date_time.iso8601 }}"
+          role: "{{ item.1.role }}"
+          is_sudo: "{{ item.1.is_sudo }}"
+          user_state: "{{ item.1.user_state }}"
+          use_sudo_nopass: "{{ item.1.use_sudo_nopass }}"
+        validate_certs: false
+      # loop: "{{ hostvars['localhost']['teams'] | map(attribute='members') | flatten }}"
+      loop: "{{ _teams | subelements('members') }}"
+      when: >
+        (item.0.name ~ '/' ~ item.1.username) not in _users
+      # loop: "{{ missing_users }}"
+      # when: missing_users is defined and missing_users | length > 0
+      # loop_control:
+      #   label: "{{ item.0.name }}/{{ item.1.username }}"
+
+  tasks:
+
+    - name: Enable KV v2 secrets engine
+      ansible.builtin.command:
+        cmd: vault secrets enable -version=2 -path={{ engine_name }} kv
+      # environment:
+      #   VAULT_ADDR: "{{ vault_url }}"
+      register: enable_result
+      changed_when: "'already mounted' not in enable_result.stderr"
+      ignore_errors: true
+      no_log: true
+
+    - name: Check if users exists
+      ansible.builtin.command:
+        cmd: vault kv get -format=json {{ engine_name }}/{{ base_path }}/{{ item.0.name }}/{{ item.1.username }}
+      # environment:
+      #   VAULT_ADDR: "{{ vault_url }}"
+      register: result
+      failed_when: result.rc not in [0, 2]
+      changed_when: result.rc == 2
+      notify: create_user_in_vault
+      loop: "{{ _teams | subelements('members') }}"
+      loop_control:
+        label: "{{ item.0.name }}/{{ item.1.username }}"
+
+    - name: Flush handlers
+      meta: flush_handlers
+
+#     - name: Get all groups from Vault and store in fact
+#       ansible.builtin.command:
+#         cmd: vault kv list -format=json {{ engine_name }}/{{ base_path }}
+#       environment:
+#         VAULT_ADDR: "{{ vault_url }}"
+#       register: vault_groups_raw
+#       failed_when: vault_groups_raw.rc not in [0, 2]   # allow both 0 and 2
+#       changed_when: vault_groups_raw.rc == 0
+# 
+#     - name: Extract and set groups fact from Vault
+#       ansible.builtin.set_fact:
+#         vault_groups: "{{ vault_groups_raw.stdout | from_json |map('regex_replace', '/$', '') | list | unique }}"
+# 
+#     - name: Show groups extracted from Vault
+#       ansible.builtin.debug:
+#         msg: "Groups found in Vault: {{ vault_groups }}"
+
+    - name: Get all teams
+      ansible.builtin.command:
+        cmd: vault kv list -format=json {{ engine_name }}/{{ base_path }}
+      # environment:
+      #   VAULT_ADDR: "{{ vault_url }}"
+      #   VAULT_SKIP_VERIFY: 1
+      #   VAULT_ROLE_ID: "{{ vault_role_id }}"
+      #   VAULT_SECRET_ID: "{{ vault_secret_id }}"
+      register: vault_teams_raw
+    
+    - name: Parse teams
+      ansible.builtin.set_fact:
+        vault_teams: "{{ vault_teams_raw.stdout | from_json |map('regex_replace', '/$', '')}}"
+    
+    - name: Get users under each team
+      ansible.builtin.command:
+        cmd: vault kv list -format=json {{ engine_name }}/{{ base_path }}/{{ item }}
+      # environment:
+      #   VAULT_ADDR: "{{ vault_url }}"
+      #   VAULT_SKIP_VERIFY: 1
+      #   VAULT_ROLE_ID: "{{ vault_role_id }}"
+      #   VAULT_SECRET_ID: "{{ vault_secret_id }}"
+      loop: "{{ vault_teams }}"
+      register: vault_users_list
+      no_log: false
+    
+    - name: Build full users list
+      ansible.builtin.set_fact:
+        users: >-
+          {{
+            users | default([]) +
+            (
+              item.stdout | from_json
+              | map('regex_replace', '^(.*)$', item.item ~ '/' ~ '\1')
+              | list
+            )
+          }}
+      loop: "{{ vault_users_list.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    - name: Debug users
+      ansible.builtin.debug:
+        msg: "{{ users }}"
+
+    - name: Process all users in teams
+      ansible.builtin.set_fact:
+        teams: >-
+          {{
+            (teams | default([])) +
+            [{
+              'name': item.split('/')[0],
+              'members': [{
+                'username': item.split('/')[1],
+                'password': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.password | default(''),
+                'groups': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.groups | default(item.split('/')[0]),
+                'ssh_key': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.ssh_key | default(vaulted_ssh_keys),
+                'role': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.role | default(''),
+                'use_sudo': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.use_sudo | default('yes'),
+                'is_sudo': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.is_sudo | default(true),
+                'user_state': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.user_state | default('present'),
+                'use_sudo_nopass': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.use_sudo_nopass | default('yes'),
+                'servers': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.servers | default(['all'])
+              }]
+            }]
+          }}
+      loop: "{{ users }}"
+
+    - name: Add targeted_host to group
+      ansible.builtin.add_host:
+        hostname: "{{ item }}"
+        groups: init
+      loop: 
+        - "{{ targeted_hosts }}"
+
+    - name: wait for vm to become reachable
+      ansible.builtin.wait_for_connection:
+        timeout: 900
+      loop: "{{ groups['init'] }}"
+
+    - name: Make teams variable available to all hosts
+      ansible.builtin.set_fact:
+        teams: "{{ teams }}"
+      delegate_to: "{{ item }}"
+      loop: "{{ groups['init'] | default([]) }}"
+
+- name: Create Linux Users on Remote Hosts
+  hosts: init
+  become: true
+  no_log: false
+  vars:
+    users: "{{ hostvars['localhost']['teams'] | map(attribute='members') | flatten }}"
+
+  tasks:
+    - name: Show users form Vault
+      ansible.builtin.debug:
+        msg: |
+          "{{ item }}"
+      loop: "{{ users }}"
+
+    - name: Run create-users
+      ansible.builtin.include_role:
+        name: "{{ item }}"
+      loop:
+        - "{{ playbook_dir }}/../../roles/pinguozzo.create-users"
+
+###
+# 
+#     - name: Create a random user (optional)
+#       block:
+#         - name: Build list of missing users
+#           ansible.builtin.set_fact:
+#             missing_users: "{{ missing_users | default([]) + [item.item] }}"
+#           when: item.rc == 2
+#           loop: "{{ result.results }}"
+#           loop_control:
+#             label: "{{ item.item.0.name }}/{{ item.item.1.username }}"
+# 
+#         - name: Show missing users in Vault
+#           ansible.builtin.debug:
+#             msg: |
+#               "{{ item.0.name }}/{{ item.1.username }}"
+#           loop: "{{ missing_users | default([]) }}"
+#           loop_control:
+#             label: "{{ item.0.name }}/{{ item.1.username }}"
+# 
+#         - name: Flush handlers
+#           meta: flush_handlers
+# 
+#         - name: Define random options
+#           ansible.builtin.set_fact:
+#             random_groups:
+#               - developers
+#               - devops
+#               - platform
+#               - super-admin
+#             random_roles:
+#               - backend-developer
+#               - frontend-developer
+#               - fullstack-developer
+#               - platform-engineer
+#               - sre
+#               - platform-admin
+#     
+#         - name: Generate random password
+#           ansible.builtin.set_fact:
+#             raw_password: "{{ lookup('password', '/dev/null length=14 chars=ascii_letters,digits') }}#{{ range(1000, 9999) | random }}"
+# 
+#         - name: Generate random user
+#           ansible.builtin.set_fact:
+#             new_user:
+#               username: "{{ ['alex', 'jordan', 'taylor', 'morgan', 'casey', 'riley', 'quinn', 'avery'] | random }}_{{ ['smith', 'johnson', 'lee', 'garcia', 'brown', 'davis'] | random }}"
+#               password: "{{ raw_password('sha512') }}" # hashed (for user module)
+#               groups: "{{ random_groups | random }}"
+#               role: "{{ random_roles | random }}"
+#               use_sudo: yes
+#               is_sudo: true
+#               user_state: present
+#               use_sudo_nopass: yes
+#               servers: ["all"]
+#               ssh_keys: "{{ vaulted_ssh_keys | default([]) }}"
+# 
+#         - name: Show created random user
+#           ansible.builtin.debug:
+#             msg: |
+#               Created random user:
+#                 Username  : {{ new_user.username }}
+#                 Group     : {{ new_user.groups }}
+#                 Role      : {{ new_user.role }}
+# 
+#         - name: Store random user in Vault
+#           ansible.builtin.command:
+#             cmd: >
+#               vault kv put
+#               {{ engine_name }}/{{ base_path }}/{{ new_user.groups }}/{{ new_user.username }}
+#               password="{{ new_user.password_hash }}"
+#               groups="{{ new_user.groups }}"
+#               role="{{ new_user.role }}"
+#               use_sudo="{{ new_user.use_sudo }}"
+#               is_sudo="{{ new_user.is_sudo }}"
+#               user_state="{{ new_user.user_state }}"
+#               use_sudo_nopass="{{ new_user.use_sudo_nopass }}"
+#               servers="{{ new_user.servers | join(',') }}"
+#               ssh_keys="{{ new_user.ssh_keys | join(',') if new_user.ssh_keys is iterable and new_user.ssh_keys is not string else new_user.ssh_keys }}"
+#           environment:
+#             VAULT_ADDR: "{{ vault_url }}"
+#       when: create_random_user | default(false) | bool
+#       tags: never
+#     
+#    - name: Get list of all users from Vault
+#      ansible.builtin.command:
+#        cmd: vault kv list -format=json {{ engine_name }}/{{ base_path }}/{{ item.0.name }}
+#      environment:
+#        VAULT_ADDR: "{{ vault_url }}"
+#      changed_when: false
+#      loop: "{{ hostvars['localhost']['teams'] | map(attribute='members') | flatten }}"
+#      #loop: "{{ _teams | subelements('members') }}"
+#      tags: never
+#      register: vaulted_users
