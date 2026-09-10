@@ -1,4 +1,3 @@
----
 - name: Create Secrets in Vault + Provision Users on Remote Hosts
   hosts: localhost
   gather_facts: true
@@ -6,6 +5,8 @@
   vars:
     engine_name: "ansible-infra"
     base_path: "users-credentials/teams"
+    role_id: "{{ lookup('env', 'VAULT_APPROLE_ROLE_ID') }}"
+    secret_id: "{{ lookup('env', 'VAULT_APPROLE_SECRET_ID') }}"  # Pulled from credential
 
   vars_files:
     - "{{ playbook_dir }}/../../vars/rex-user.yml"
@@ -16,6 +17,9 @@
 
   handlers:
     - name: create_user_in_vault
+       # role: "{{ item.1.role }}"
+       # use_sudo_nopass: "{{ item.1.use_sudo_nopass }}"
+       # team: "{{ item.0.name }}"
       community.hashi_vault.vault_kv2_write:
         url: "{{ vault_url }}"
         engine_mount_point: "{{ engine_name }}"
@@ -23,13 +27,10 @@
         data:
           username: "{{ item.1.username }}"
           password: "{{ item.1.password }}"
-          team: "{{ item.0.name }}"
           ssh_key: "{{ item.1.ssh_key }}"
           created_at: "{{ ansible_date_time.iso8601 }}"
-          role: "{{ item.1.role }}"
           is_sudo: "{{ item.1.is_sudo }}"
           user_state: "{{ item.1.user_state }}"
-          use_sudo_nopass: "{{ item.1.use_sudo_nopass }}"
         validate_certs: false
       # loop: "{{ hostvars['localhost']['teams'] | map(attribute='members') | flatten }}"
       loop: "{{ _teams | subelements('members') }}"
@@ -45,12 +46,27 @@
     - name: Enable KV v2 secrets engine
       ansible.builtin.command:
         cmd: vault secrets enable -version=2 -path={{ engine_name }} kv
-      # environment:
-      #   VAULT_ADDR: "{{ vault_url }}"
+      environment:
+        VAULT_ADDR: "{{ vault_url }}"
+        VAULT_SKIP_VERIFY: 1
+        VAULT_ROLE_ID: "{{ vault_role_id }}"
+        VAULT_SECRET_ID: "{{ vault_secret_id }}"
       register: enable_result
       changed_when: "'already mounted' not in enable_result.stderr"
       ignore_errors: true
-      no_log: true
+      no_log: false
+
+#    - name: Get secret from Vault KV2 using AppRole
+#      community.hashi_vault.vault_kv2_get:
+#        url: "{{ vault_url }}"
+#        path: "{{ base_path }}"
+#        auth_method: approle
+#        engine_mount_point: "{{ engine_name }}"
+#        role_id: "{{ lookup('env', 'VAULT_ROLE_ID') }}"      # Pulled from credential
+#        secret_id: "{{ lookup('env', 'VAULT_SECRET_ID') }}"  # Pulled from credential
+#        validate_certs: false
+#      register: vault_result
+#      no_log: false
 
     - name: Check if users exists
       ansible.builtin.command:
@@ -68,31 +84,31 @@
     - name: Flush handlers
       meta: flush_handlers
 
-#     - name: Get all groups from Vault and store in fact
-#       ansible.builtin.command:
-#         cmd: vault kv list -format=json {{ engine_name }}/{{ base_path }}
-#       environment:
-#         VAULT_ADDR: "{{ vault_url }}"
-#       register: vault_groups_raw
-#       failed_when: vault_groups_raw.rc not in [0, 2]   # allow both 0 and 2
-#       changed_when: vault_groups_raw.rc == 0
-# 
-#     - name: Extract and set groups fact from Vault
-#       ansible.builtin.set_fact:
-#         vault_groups: "{{ vault_groups_raw.stdout | from_json |map('regex_replace', '/$', '') | list | unique }}"
-# 
-#     - name: Show groups extracted from Vault
-#       ansible.builtin.debug:
-#         msg: "Groups found in Vault: {{ vault_groups }}"
+    - name: Get all groups from Vault and store in fact
+      ansible.builtin.command:
+        cmd: vault kv list -format=json {{ engine_name }}/{{ base_path }}
+      environment:
+        VAULT_ADDR: "{{ vault_url }}"
+      register: vault_groups_raw
+      failed_when: vault_groups_raw.rc not in [0, 2]   # allow both 0 and 2
+      changed_when: vault_groups_raw.rc == 0
+
+    - name: Extract and set groups fact from Vault
+      ansible.builtin.set_fact:
+        vault_groups: "{{ vault_groups_raw.stdout | from_json |map('regex_replace', '/$', '') | list | unique }}"
+
+    - name: Show groups extracted from Vault
+      ansible.builtin.debug:
+        msg: "Groups found in Vault: {{ vault_groups }}"
 
     - name: Get all teams
       ansible.builtin.command:
         cmd: vault kv list -format=json {{ engine_name }}/{{ base_path }}
-      # environment:
-      #   VAULT_ADDR: "{{ vault_url }}"
-      #   VAULT_SKIP_VERIFY: 1
-      #   VAULT_ROLE_ID: "{{ vault_role_id }}"
-      #   VAULT_SECRET_ID: "{{ vault_secret_id }}"
+      environment:
+        VAULT_ADDR: "{{ vault_url }}"
+        VAULT_SKIP_VERIFY: 1
+        VAULT_ROLE_ID: "{{ vault_role_id }}"
+        VAULT_SECRET_ID: "{{ vault_secret_id }}"
       register: vault_teams_raw
     
     - name: Parse teams
@@ -102,11 +118,11 @@
     - name: Get users under each team
       ansible.builtin.command:
         cmd: vault kv list -format=json {{ engine_name }}/{{ base_path }}/{{ item }}
-      # environment:
-      #   VAULT_ADDR: "{{ vault_url }}"
-      #   VAULT_SKIP_VERIFY: 1
-      #   VAULT_ROLE_ID: "{{ vault_role_id }}"
-      #   VAULT_SECRET_ID: "{{ vault_secret_id }}"
+      environment:
+        VAULT_ADDR: "{{ vault_url }}"
+        VAULT_SKIP_VERIFY: 1
+        VAULT_ROLE_ID: "{{ vault_role_id }}"
+        VAULT_SECRET_ID: "{{ vault_secret_id }}"
       loop: "{{ vault_teams }}"
       register: vault_users_list
       no_log: false
@@ -131,6 +147,9 @@
         msg: "{{ users }}"
 
     - name: Process all users in teams
+      # 'groups': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.groups | default(item.split('/')[0]),
+      # 'role': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.role | default(''),
+      # 'use_sudo_nopass': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.use_sudo_nopass | default('yes'),
       ansible.builtin.set_fact:
         teams: >-
           {{
@@ -140,17 +159,19 @@
               'members': [{
                 'username': item.split('/')[1],
                 'password': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.password | default(''),
-                'groups': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.groups | default(item.split('/')[0]),
                 'ssh_key': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.ssh_key | default(vaulted_ssh_keys),
-                'role': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.role | default(''),
                 'use_sudo': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.use_sudo | default('yes'),
                 'is_sudo': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.is_sudo | default(true),
                 'user_state': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.user_state | default('present'),
-                'use_sudo_nopass': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.use_sudo_nopass | default('yes'),
-                'servers': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.servers | default(['all'])
+                'servers': (lookup('pipe', 'vault kv get -format=json ' + engine_name + '/' + base_path + '/' + item) | from_json).data.data.servers | default([''])
               }]
             }]
           }}
+      # environment:
+      #   VAULT_ADDR: "{{ vault_url }}"
+      #   VAULT_SKIP_VERIFY: 1
+      #   VAULT_ROLE_ID: "{{ vault_role_id }}"
+      #   VAULT_SECRET_ID: "{{ vault_secret_id }}"
       loop: "{{ users }}"
 
     - name: Add targeted_host to group
