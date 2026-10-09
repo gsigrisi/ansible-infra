@@ -40,7 +40,7 @@
         - "{{ host_list }}"
 
     - name: create a new token using controller username/password
-      ansible.controller.token:
+      ansible.platform.token:
         description: 'Creating token to test controller jobs'
         scope: "write"
         state: present
