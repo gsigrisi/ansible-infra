@@ -2,7 +2,7 @@
 collections:
   - name: awx.awx
   - name: ansible.posix
-  - name: ansible.controller
+  - name: ansible.platform
   - name: community.general
   - name: community.vmware
   - name: community.hashi_vault
