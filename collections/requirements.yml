@@ -8,7 +8,6 @@ collections:
   - name: containers.podman
   - name: infra.aap_configuration
   - name: infra.ee_utilities
-  - name: redhat.rhv
   - name: ovirt.ovirt
   - name: redhat.satellite
   - name: redhat.satellite_operations
