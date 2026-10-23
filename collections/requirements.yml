@@ -6,15 +6,10 @@ collections:
   - name: community.vmware
   - name: community.hashi_vault
   - name: containers.podman
-  - name: infra.ah_configuration
-  - name: infra.controller_configuration
+  - name: infra.aap_configuration
   - name: infra.ee_utilities
-  - name: redhat.rhel_system_roles
   - name: redhat.rhv
   - name: ovirt.ovirt
   - name: redhat.satellite
   - name: redhat.satellite_operations
-  - name: redhat_cop.ah_configuration
-  - name: redhat_cop.controller_configuration
-  - name: redhat_cop.ee_utilities
   - name: vmware.vmware_rest
