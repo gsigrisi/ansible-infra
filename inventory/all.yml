@@ -1,23 +1,6 @@
 ---
 all:
   vars:
-    set_3rdparty: false
-    set_ak: false
-    set_cv: false
-    set_disconnected: false
-    set_environments: false
-    set_force_promote: true
-    set_force_register: false
-    set_fresh_install: false
-    set_global: false
-    set_installer: false
-    set_locations: false
-    set_lvm: false
-    set_manifest: false
-    set_repos: false
-    set_sync: false
-    set_sync_plan: false
-    set_sync_repos: false
     location: CH
     timezone: Europe\Zurich
   hosts:
@@ -30,17 +13,46 @@ all:
       ansible_host: satellite.mgmt.zg.pinguozzo.com
       env: mgmt
       infra: yes
+      set_3rdparty: false
+      set_ak: false
+      set_cv: false
+      set_disconnected: false
+      set_environments: false
+      set_force_promote: true
+      set_force_register: false
+      set_fresh_install: false
+      set_global: false
+      set_installer: false
+      set_locations: false
+      set_lvm: false
+      set_manifest: false
+      set_repos: false
+      set_sync: false
+      set_sync_plan: false
+      set_sync_repos: false
     localhost:
       ansible_connection: local
       ansible_python_interpreter: "{{ ansible_playbook_python }}"
       env: mgmt
   children:
     INFRA:
+      vars:
+        ansible_user: rex
+        ansible_python_interpreter: auto
       children:
+        ocp-imf:
+          children:
+            masters:
+              hosts:
+                sm01.mgmt.zg.pinguozzo.com:
+                sm02.mgmt.zg.pinguozzo.com:
+                sm03.mgmt.zg.pinguozzo.com:
+            ceph:
+              hosts:
+                n5-01.apps.pinguozzo.com:
+                n5-02.apps.pinguozzo.com:
+                n5-03.apps.pinguozzo.com:
         rhvh:
-          vars:
-            ansible_user: rex
-            ansible_python_interpreter: auto
           hosts:
             virt-console:
         mgmt:
