@@ -2,6 +2,10 @@
 offline: true
 profile: production
 strict: true
+exclude_paths:
+  - .git/
+  - .venv/
+  - collections/
 
 # Additional rules to enable if no profile set
 enable_list:

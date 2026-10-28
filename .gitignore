@@ -12,7 +12,7 @@
 *.iso
 
 
-# Logs and databases 
+# Logs and databases
 *.log
 
 # Virtualization
@@ -38,3 +38,4 @@ installers/
 
 # Python venv
 venvs
+ansible-navigator.yml

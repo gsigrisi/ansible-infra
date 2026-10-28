@@ -53,10 +53,10 @@
             compute_attributes:
               start: "1"
             ptable: "{{ ptable }}"
-            provision_method: bootdisk
+            provision_method: "{{ boot_method | default('bootdisk') }}"
             operatingsystem: "{{ os }}"
             kickstart_repository: "{{ ks }}"
-            subnet: "APPS"
+            subnet: "{{ net }}"
             content_source: "{{ capsule_server }}"
             content_view: "{{ cv }}"
             lifecycle_environment: "LAB"

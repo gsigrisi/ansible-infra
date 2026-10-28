@@ -5,8 +5,8 @@
 
 - name: Include disconnected.yml
   ansible.builtin.import_playbook: disconnected.yml
-  tags: disconnected
-  when: set_disconnected | bool
+  tags: never,disconnected
+  #when: set_disconnected | bool
 
 - name: Include storage.yml
   ansible.builtin.import_playbook: storage.yml
@@ -15,8 +15,8 @@
 
 - name: Include satellite-installer.yml
   ansible.builtin.import_playbook: satellite-installer.yml
-  tags: installer
-  when: set_installer | bool
+  tags: never,installer
+  #when: set_installer | bool
 
 - name: Include manifest.yml
   ansible.builtin.import_playbook: manifest.yml
