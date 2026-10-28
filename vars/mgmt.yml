@@ -260,6 +260,24 @@ satellite_products:
       - name: Red Hat Enterprise Linux 10 for x86_64 - BaseOS (Kickstart)
         releasever: 10.2
         download_policy: immediate
+      - name: Red Hat Enterprise Linux 10 for x86_64 - AppStream (RPMs)
+        releasever: 10.1
+      - name: Red Hat Enterprise Linux 10 for x86_64 - BaseOS (RPMs)
+        releasever: 10.1
+      - name: Red Hat Enterprise Linux 10 for x86_64 - AppStream (Kickstart)
+        releasever: 10.1
+      - name: Red Hat Enterprise Linux 10 for x86_64 - BaseOS (Kickstart)
+        releasever: 10.1
+        download_policy: immediate
+      - name: Red Hat Enterprise Linux 10 for x86_64 - AppStream (RPMs)
+        releasever: 10.0
+      - name: Red Hat Enterprise Linux 10 for x86_64 - BaseOS (RPMs)
+        releasever: 10.0
+      - name: Red Hat Enterprise Linux 10 for x86_64 - AppStream (Kickstart)
+        releasever: 10.0
+      - name: Red Hat Enterprise Linux 10 for x86_64 - BaseOS (Kickstart)
+        releasever: 10.0
+        download_policy: immediate
       - name: Red Hat Enterprise Linux 8 for x86_64 - AppStream (Kickstart)
         releasever: "8.10"
       - name: Red Hat Enterprise Linux 8 for x86_64 - BaseOS (Kickstart)
