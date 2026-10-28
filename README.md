@@ -16,7 +16,7 @@ Playbooks are written to run from the CLI and as Automation Platform job templat
 
 ### Virtualization
 - **Red Hat Virtualization / oVirt** (`playbooks/rhv/`, `playbooks/infra/`, `playbooks/ovirt-rename-disks.yml`): create a host, rename VM disks, back up the Hosted Engine, and shut an environment down.
-- **VMware** (`playbooks/vmware/`): upload and convert a VMDK, create a template, create a VM from that template, add the host to inventory, run post-install, add swap, associate the VM with a compute resource, and clean leftover datastore files.
+- **VMware** (`playbooks/vmware/`): upload and convert a VMDK, create a template, create a VM from that template, add the host to inventory, run post-install, add swap, and associate the VM with a compute resource. Datastore cleanup is `playbooks/infra/vmware_datastore_cleanup.yml`.
 
 ### Host and lab tasks (`playbooks/infra/` and top-level playbooks)
 - Create Linux users, including users whose secrets come from HashiCorp Vault, and register or migrate a host.
@@ -25,7 +25,7 @@ Playbooks are written to run from the CLI and as Automation Platform job templat
 - Update Cloudflare DNS A records, install GitLab, and install Image Builder (`osbuild-composer`).
 
 ### Red Hat Satellite 6 (`playbooks/satellite/`)
-- Post-configure a Satellite server: repositories, third-party products, global parameters, installer, manifest, locations, lifecycle environments, activation keys, and sync plans.
+- Post-configure a Satellite server: repositories, third-party products, global parameters, installer, manifest, locations, lifecycle environments, activation keys, and sync plans. `playbooks/satellite/config/all.yml` turns those steps on with inventory `set_*` flags. `playbooks/satellite/config.yml` runs repositories, third-party products, and global parameters, selected by tags. The installer and disconnected plays run only when their tags are selected.
 - Search, list, and sync repositories, and manage content-view versions.
 - Register, delete, and group hosts, and provision from an image, iPXE, or a VMware boot disk.
 - Build golden images and turn them into templates, including a KVM template path.
@@ -42,10 +42,6 @@ On a daily base, I use Red Hat Satellite, Ansible Automation Platform and Red Ha
 sometimes it breaks.\
 \
 Manual installation takes a lot of time and all I want to do is *automate*.
-
-## Scope
-This playbook is not meant for daily tasks such as creating and provision new hosts.\
-It can be useful in case specific operations are needed after the initial base OS installation.
 
 ## How to use
 The code has been created to be used both from cli and Ansible Automation Platform.
