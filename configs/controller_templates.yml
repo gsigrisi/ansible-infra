@@ -42,7 +42,7 @@ controller_templates:
   description:
   credentials: 
      - "vault"
-     - "ssh credential: root"
+     - "ssh: rex"
   job_type: run
   inventory: 5
   project: 8
@@ -82,7 +82,7 @@ controller_templates:
   description:
   credentials: 
      - "vault"
-     - "ssh credential: rex"
+     - "ssh: rex"
   job_type: run
   inventory: 5
   project: 8
