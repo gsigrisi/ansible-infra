@@ -1,70 +1,93 @@
 ---
-- name: Include vars
-  include_vars: "{{ item }}.yml"
+- name: Load engine, Telegram, and NFS settings
+  ansible.builtin.include_vars:
+    file: "{{ item }}.yml"
   loop:
     - engine_vars
     - telegram
     - nfs
 
-- name: Set backup_filename fact
-  set_fact:
+- name: Set backup filename
+  ansible.builtin.set_fact:
     backup_filename: "{{ nfs_mount }}/{{ nfs_path }}/he-backup-{{ ansible_date_time.date }}"
 
-- name: Create backup directroy structure if not exists
-  ansible.builtin.file:
-    path: "{{ nfs_mount }}/{{ nfs_path }}"
-    state: directory
-    mode: '0755'
+- name: Back up the Hosted Engine
+  block:
+    - name: Mount the NFS backup share
+      ansible.posix.mount:
+        path: "{{ nfs_mount }}"
+        src: "{{ nfs_server }}:/{{ nfs_export }}"
+        fstype: nfs
+        state: mounted
 
-- name: Ensure NFS Backup share is mounted
-  ansible.posix.mount: name={{ nfs_mount }} src={{ nfs_server }}:/{{ nfs_export }} fstype=nfs state=mounted
+    - name: Create the backup directory
+      ansible.builtin.file:
+        path: "{{ nfs_mount }}/{{ nfs_path }}"
+        state: directory
+        mode: "0755"
 
-- name: Check if backup already run
-  stat:
-    path: "{{ backup_filename }}"
-  register: he_backup_done
+    - name: Check whether today's backup already exists
+      ansible.builtin.stat:
+        path: "{{ backup_filename }}"
+      register: he_backup_done
 
-- name: Run he backup Full
-  ansible.builtin.shell: engine-backup --scope=all --mode=backup --file="{{ backup_filename }}" --log=/var/log/he-backup-"{{ ansible_date_time.date }}".log
-  register: he_backup
-  ignore_errors: false
-  when: he_backup_done.stat.path is not defined
+    - name: Run the full Hosted Engine backup
+      ansible.builtin.command:
+        cmd: >-
+          engine-backup
+          --scope=all
+          --mode=backup
+          --file={{ backup_filename }}
+          --log=/var/log/he-backup-{{ ansible_date_time.date }}.log
+      register: he_backup
+      when: not he_backup_done.stat.exists
 
-- name: Get backup status
-  ansible.builtin.debug: msg="Backup completed successfully"
-  when: he_backup is defined and 'rc' in he_backup and he_backup.rc == 0
+    - name: Record the backup result
+      ansible.builtin.set_fact:
+        he_backup_message: >-
+          {{
+            'ovirt-engine backup completed successfully on ' ~ ansible_date_time.date
+            if (he_backup is defined and he_backup.rc | default(none) == 0)
+            else 'ovirt-engine backup skipped on ' ~ ansible_date_time.date
+          }}
 
-- name: Notify via telegram
-  community.general.telegram:
-    token: "{{ pinguobot_token }}"
-    api_args:
-      chat_id: "{{ pinguobot_chatid }}"
-      #text: "{{ ovirt-engine backup completed successfully"
-      text: "{{ msg }}"
-      parse_mode: "markdown"
-      disable_web_page_preview: true
-      disable_notification: true
-      #when: he_backup is defined and 'rc' in he_backup and he_backup.rc == 0
-  vars:
-    msg: "{% if he_backup is defined and 'rc' in he_backup and 'he_backup.rc' == 0 %}ovirt-engine backup completed successfully on {{ ansible_date_time.date }} {% else %}ovirt-backup skipped on  {{ ansible_date_time.date }}{% endif %}"
+    - name: Show the backup result
+      ansible.builtin.debug:
+        msg: "{{ he_backup_message }}"
 
+    - name: Notify the backup result on Telegram
+      community.general.telegram:
+        token: "{{ pinguobot_token }}"
+        api_args:
+          chat_id: "{{ pinguobot_chatid }}"
+          text: "{{ he_backup_message }}"
+          parse_mode: markdown
+          disable_web_page_preview: true
+          disable_notification: true
 
-- name: "Find backups older then {{ retention_days }}"
-  find:
-    paths: "{{ nfs_mount }}/{{ nfs_path }}/"
-    age: "{{ retention_days }}"
-    recurse: true
-  register: files_to_delete
+    - name: Find backups older than {{ retention_days }}
+      ansible.builtin.find:
+        paths: "{{ nfs_mount }}/{{ nfs_path }}"
+        age: "{{ retention_days }}"
+        recurse: true
+      register: files_to_delete
 
-- name: "He backup files to be deleted"
-  ansible.builtin.debug: var=item.path
-  with_items: "{{ files_to_delete.files }}"
+    - name: Show Hosted Engine backups to delete
+      ansible.builtin.debug:
+        msg: "{{ files_to_delete.files | map(attribute='path') | list }}"
 
-- name: Delete old he backup files
-  file:
-    path: "{{ item.path }}"
-    state: absent
-  with_items: "{{ files_to_delete.files }}"
+    - name: Delete old Hosted Engine backups
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ files_to_delete.files }}"
+      loop_control:
+        label: "{{ item.path }}"
 
-- name: "Umount nfs Backup share"
-  ansible.posix.mount: name={{ nfs_mount }} src={{ nfs_server }}:/{{ nfs_export }} fstype=nfs state=unmounted
+  always:
+    - name: Unmount the NFS backup share
+      ansible.posix.mount:
+        path: "{{ nfs_mount }}"
+        src: "{{ nfs_server }}:/{{ nfs_export }}"
+        fstype: nfs
+        state: unmounted
