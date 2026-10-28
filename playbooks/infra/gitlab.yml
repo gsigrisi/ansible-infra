@@ -1,9 +1,0 @@
----
-- name: install gitlab
-  hosts: all
-
-  vars_files:
-    - "{{ playbook_dir }}/../../vaults/{{ env }}-vault.yml"
-
-  roles:
-    - ../../roles/pinguozzo.gitlab

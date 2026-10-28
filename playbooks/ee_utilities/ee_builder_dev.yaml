@@ -6,10 +6,10 @@
     - "{{ playbook_dir }}/../../vaults/{{ env }}-vault.yml"
 
   vars:
-    ee_aap_version: 2.6
+    ee_aap_version: 2.7
     ee_builder_dir_clean: false
     ee_update_base_images: false
-    ee_base_image: registry.redhat.io/ansible-automation-platform-26/ee-minimal-rhel9:latest
+    ee_base_image: registry.redhat.io/ansible-automation-platform-27/ee-minimal-rhel9:latest
     ee_prune_images: false
     ee_pull_collections_from_hub: true
     ee_ah_host: "{{ vaulted_ah_host }}"
@@ -39,6 +39,7 @@
             - systemd-devel [platform:rpm]
             - libxml2-devel [platform:rpm]
             - libxslt-devel [platform:rpm]
+            - unzip [platform:rpm]
           python:
             - awxkit
             - dnspython
@@ -50,9 +51,6 @@
           galaxy:
             collections:
               - name: awx.awx
-              - name: ansible.controller
-              - name: ansible.eda
-              - name: ansible.hub
               - name: ansible.platform
               - name: ansible.posix
               - name: ansible.utils
@@ -62,8 +60,7 @@
               - name: community.vmware
               - name: community.hashi_vault
               - name: containers.podman
-              - name: infra.ah_configuration
-              - name: infra.controller_configuration
+              - name: infra.aap_configuration
               - name: infra.ee_utilities
               - name: kubernetes.core
               - name: redhat.openshift
@@ -76,6 +73,16 @@
           exclude:
             system:
               - openshift-clients
+
+        additional_build_steps:
+          prepend_base: []
+          append_base: []
+          prepend_final: []
+          append_final:
+            - RUN curl -fsSL https://releases.hashicorp.com/vault/1.18.3/vault_1.18.3_linux_amd64.zip -o /tmp/vault.zip
+            - RUN unzip /tmp/vault.zip -d /usr/local/bin/
+            - RUN chmod +x /usr/local/bin/vault
+            - RUN rm /tmp/vault.zip
 
         build_steps:
           append_final:
