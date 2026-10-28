@@ -6,7 +6,7 @@ controller_templates:
   job_type: run
   inventory: 5
   project: 8
-  playbook: playbooks/pinguozzo.satellite/delete_host.yml
+  playbook: playbooks/satellite/delete_host.yml
   scm_branch: 
   forks: 0
   limit: 
@@ -46,7 +46,7 @@ controller_templates:
   job_type: run
   inventory: 5
   project: 8
-  playbook: playbooks/pinguozzo.infra/create-users.yml
+  playbook: playbooks/infra/create-users.yml
   scm_branch: 
   forks: 0
   limit: targeted_host
