@@ -5,9 +5,9 @@ rhc_auth:
     keys:
       - "ak-rhel10"
 
-net: "{{ network | default('NET_MGMT') }}"
-hg_name: "{{ hg | default('ESX/RHEL10_NET_MGMT') }}"
-hg_name_short: "RHEL10_NET_MGMT"
+net: "{{ network | default('APPS') }}"
+hg_name: "{{ hg | default('ESX/RHEL10_NET_APPS') }}"
+hg_name_short: "default('ESX/RHEL10_NET_APPS')"
 os: "{{ operatingsystem | default('RedHat 10.0') }}"
 ks: "Red Hat Enterprise Linux 10 for x86_64 - BaseOS Kickstart 10.0"
 ptable: "Kickstart default EFI"
