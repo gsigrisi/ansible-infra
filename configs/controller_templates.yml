@@ -5,7 +5,7 @@ controller_templates:
   credentials: "vault"  
   job_type: run
   inventory: 5
-  project: 16
+  project: 8
   playbook: playbooks/pinguozzo.satellite/delete_host.yml
   scm_branch: 
   forks: 0
@@ -45,7 +45,7 @@ controller_templates:
      - "ssh credential: root"
   job_type: run
   inventory: 5
-  project: 16
+  project: 8
   playbook: playbooks/pinguozzo.infra/create-users.yml
   scm_branch: 
   forks: 0
@@ -85,7 +85,7 @@ controller_templates:
      - "ssh credential: rex"
   job_type: run
   inventory: 5
-  project: 16
+  project: 8
   playbook: playbooks/pinguozzo.infra/post-install.yml
   scm_branch: 
   forks: 0
