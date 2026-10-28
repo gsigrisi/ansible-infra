@@ -64,6 +64,8 @@
           parse_mode: markdown
           disable_web_page_preview: true
           disable_notification: true
+      delegate_to: localhost
+      become: false
 
     - name: Find backups older than {{ retention_days }}
       ansible.builtin.find:
