@@ -8,7 +8,7 @@
         "default": "",
         "max": 0,
         "required": true,
-        "choices": "{% for fqdn in hosts %}{{ fqdn | join('')}}{%- if loop.length > 1 and not loop.last-%}\n{% endif %}{% endfor %}",
+        "choices": "{% for fqdn in satellite_hosts %}{{ fqdn | join('')}}{%- if loop.length > 1 and not loop.last-%}\n{% endif %}{% endfor %}",
         "new_question": true,
         "variable": "vm_name",
         "question_name": "What host(s) do you want to delete?",

@@ -1,10 +1,9 @@
 ---
-- name: update host list in job_template host-delete
+- name: Update host list in job_template host-delete
   hosts: localhost
   connection: local
-  gather_facts: no
-  collections:
-    - infra.controller
+  gather_facts: false
+  no_log: false
 
   vars_files:
     - "{{ playbook_dir }}/../../vaults/{{ env }}-vault.yml"
@@ -13,43 +12,43 @@
     json_query_name: "json.results[*].name"
 
   pre_tasks:
-    - name: include vars from controller_configs directory
+    - name: Include vars from controller_configs directory
       include_vars:
         dir: ../../configs
         ignore_files: [controller_config.yml.template]
         extensions: ["yml"]
 
-    - name: get host list
+    - name: Get host list
       uri:
         url: "{{ satellite_server_url }}/api/hosts"
         user: "{{ satellite_username }}"
         password: "{{ satellite_password }}"
         method: GET
-        return_content: yes
-        force_basic_auth: yes
-        validate_certs: no
-        status_code: [200,201,202]
-      no_log: True 
+        return_content: true
+        force_basic_auth: true
+        validate_certs: false
+        status_code: [200, 201, 202]
+      no_log: true
       register: host_list
 
-    - name: set hosts_list
-      set_fact: 
-        hosts: "{{ host_list| community.general.json_query(json_query_name) }}"
-      no_log: True
-      loop: 
+    - name: Set satellite host list
+      set_fact:
+        satellite_hosts: "{{ host_list | community.general.json_query(json_query_name) }}"
+      no_log: true
+      loop:
         - "{{ host_list }}"
 
-    - name: create a new token using controller username/password
+    - name: Create a new token using controller username/password
       ansible.platform.token:
-        description: 'Creating token to test controller jobs'
+        description: "Creating token to test controller jobs"
         scope: "write"
         state: present
         validate_certs: false
-        controller_host: "{{ controller_hostname }}"
-        controller_username: "{{ controller_username }}"
-        controller_password: "{{ controller_password }}"
+        gateway_hostname: "{{ controller_hostname }}"
+        gateway_username: "{{ controller_username }}"
+        gateway_password: "{{ controller_password }}"
       when: not controller_token
 
   roles:
-    - {role: infra.controller_configuration.job_templates, when: controller_templates is defined}
+    - {role: infra.aap_configuration.controller_job_templates, when: controller_templates is defined}
 ...
