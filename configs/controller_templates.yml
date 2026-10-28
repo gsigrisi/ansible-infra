@@ -2,7 +2,9 @@
 controller_templates:
 - name: "infra: delete host"
   description:
-  credentials: "vault"  
+  credentials: 
+    - "vault"  
+    - "Satellite 6"  
   job_type: run
   inventory: 5
   project: 8
