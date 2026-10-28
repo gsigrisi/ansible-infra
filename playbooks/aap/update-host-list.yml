@@ -50,5 +50,8 @@
       when: not controller_token
 
   roles:
-    - {role: infra.aap_configuration.controller_job_templates, when: controller_templates is defined}
+    - role: infra.aap_configuration.controller_job_templates
+      vars:
+        aap_validate_certs: false
+      when: controller_templates is defined
 ...
