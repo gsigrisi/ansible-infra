@@ -38,7 +38,7 @@ controller_templates:
   job_slice_count: 1
   webhook_service: 
   webhook_credential: 
-- name: "pinguozzo: create-users"
+- name: "infra-config: create-users"
   description:
   credentials: 
      - "pinguozzo: vault"
