@@ -1,0 +1,42 @@
+{
+   "name": "Create oVirt instances",
+   "description": "Choose how many RHEL 8, 9, and 10 instances to create. Names look like lab-rhel8-otter-01.",
+   "spec": [
+      {
+        "question_name": "RHEL 8 instances",
+        "question_description": "Number of RHEL 8 instances to create. Use 0 to skip this operating system.",
+        "required": true,
+        "type": "integer",
+        "variable": "rhel8_instances",
+        "min": 0,
+        "max": 20,
+        "default": "0",
+        "choices": "",
+        "new_question": true
+      },
+      {
+        "question_name": "RHEL 9 instances",
+        "question_description": "Number of RHEL 9 instances to create. Use 0 to skip this operating system.",
+        "required": true,
+        "type": "integer",
+        "variable": "rhel9_instances",
+        "min": 0,
+        "max": 20,
+        "default": "0",
+        "choices": "",
+        "new_question": true
+      },
+      {
+        "question_name": "RHEL 10 instances",
+        "question_description": "Number of RHEL 10 instances to create. Use 0 to skip this operating system.",
+        "required": true,
+        "type": "integer",
+        "variable": "rhel10_instances",
+        "min": 0,
+        "max": 20,
+        "default": "0",
+        "choices": "",
+        "new_question": true
+      }
+   ]
+}

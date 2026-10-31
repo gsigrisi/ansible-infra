@@ -80,3 +80,43 @@ controller_templates:
   job_slice_count: 1
   webhook_service: 
   webhook_credential: 
+- name: "infra: create host ovirt"
+  description: "Create RHEL 8, 9, and 10 instances on oVirt"
+  credentials:
+    - "vault"
+    - "Satellite 6"
+  job_type: run
+  inventory: 5
+  project: 8
+  playbook: playbooks/infra/create_host_ovirt.yml
+  scm_branch:
+  forks: 0
+  limit:
+  verbosity: 1
+  extra_vars:
+  job_tags:
+  force_handlers: false
+  skip_tags:
+  start_at_task:
+  timeout: 0
+  use_fact_cache: false
+  execution_environment: 18
+  host_config_key:
+  ask_scm_branch_on_launch: false
+  ask_diff_mode_on_launch: false
+  ask_variables_on_launch: false
+  ask_limit_on_launch: false
+  ask_tags_on_launch: false
+  ask_skip_tags_on_launch: false
+  ask_job_type_on_launch: false
+  ask_verbosity_on_launch: false
+  ask_inventory_on_launch: false
+  ask_credential_on_launch: false
+  survey_enabled: true
+  survey: "{{ lookup('template', '../../template_surveys/create-host-ovirt.j2') | regex_replace('\\n', '') }}"
+  become_enabled: false
+  diff_mode: true
+  allow_simultaneous: false
+  job_slice_count: 1
+  webhook_service:
+  webhook_credential:

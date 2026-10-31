@@ -1,24 +1,77 @@
 ---
 - name: oVirt infra
-  hosts: "{{ targeted_host| default('localhost') }}"
+  hosts: "{{ targeted_host | default('localhost') }}"
   gather_facts: false
-  collections: ovirt.ovirt.vm_infra
 
   vars_files:
     - "{{ playbook_dir }}/../../vaults/{{ env }}-vault.yml"
 
-  pre_tasks:
-    - name: Set facts
-      ansible.builtin.set_fact:
-        vm_name: "{{ lookup('community.general.random_pet') }}"
-        mac_address: "{{ '56:6f:30' | community.general.random_mac }}"
+  vars:
+    survey_mode: "{{ rhel8_instances is defined or rhel9_instances is defined or rhel10_instances is defined }}"
+    os_requests:
+      - os_major: 8
+        count: "{{ rhel8_instances | default(0) }}"
+      - os_major: 9
+        count: "{{ rhel9_instances | default(0) }}"
+      - os_major: 10
+        count: "{{ rhel10_instances | default(0) }}"
 
-    - name: Ensure Discovery Rule
+  pre_tasks:
+    - name: Set the default instance name prefix
+      ansible.builtin.set_fact:
+        instance_name_prefix: lab
+      when: instance_name_prefix | default('') | length == 0
+
+    - name: Check the survey answers
+      ansible.builtin.assert:
+        that:
+          - instance_name_prefix is match('^[A-Za-z0-9][A-Za-z0-9-]{0,20}$')
+          - (rhel8_instances | default(0) | int + rhel9_instances | default(0) | int + rhel10_instances | default(0) | int) > 0
+          - item.count | int >= 0
+          - item.count | int <= 20
+        fail_msg: >-
+          Set at least one of rhel8_instances, rhel9_instances, or rhel10_instances
+          to a number from 1 to 20.
+      loop: "{{ os_requests }}"
+      when: survey_mode | bool
+
+    - name: Build the requested instances
+      ansible.builtin.set_fact:
+        ovirt_instances: "{{ ovirt_instances | default([]) + [instance] }}"
+      vars:
+        instance:
+          os_major: "{{ item.0.os_major }}"
+          name: "{{ instance_name_prefix }}-rhel{{ item.0.os_major }}-{{ lookup('community.general.random_pet', words=1) }}-{{ '%02d' | format(item.1 | int) }}"
+          mac_address: "{{ '56:6f:30' | community.general.random_mac(seed=instance_name_prefix ~ '-rhel' ~ item.0.os_major ~ '-' ~ item.1) }}"
+      loop: "{{ os_requests | product(range(1, 21) | list) | list }}"
+      when:
+        - survey_mode | bool
+        - item.0.count | int > 0
+        - item.1 | int <= item.0.count | int
+      loop_control:
+        label: "RHEL {{ item.0.os_major }} {{ '%02d' | format(item.1 | int) }}"
+
+    - name: Build one instance
+      ansible.builtin.set_fact:
+        ovirt_instances:
+          - os_major: "{{ os_major }}"
+            name: "{{ instance_name_prefix }}-rhel{{ os_major }}-{{ lookup('community.general.random_pet', words=1) }}-01"
+            mac_address: "{{ '56:6f:30' | community.general.random_mac }}"
+      when: not survey_mode | bool
+
+    - name: Show instances to create
+      ansible.builtin.debug:
+        msg: "{{ item.name }}.{{ domain_name }} RHEL {{ item.os_major }} {{ item.mac_address }}"
+      loop: "{{ ovirt_instances }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Ensure discovery rule
       redhat.satellite.discovery_rule:
-        name: "{{ vm_name }}-discovery_rule"
-        search: 'mac = "{{ mac_address }}"'
-        hostgroup: 'RHV-4.5/RHEL{{ os_major }}_NET_APPS'
-        hostname: "{{ vm_name }}.{{ domain_name }}"
+        name: "{{ item.name }}-discovery_rule"
+        search: 'mac = "{{ item.mac_address }}"'
+        hostgroup: "RHV-4.5/RHEL{{ item.os_major }}_NET_APPS"
+        hostname: "{{ item.name }}.{{ domain_name }}"
         max_count: 1
         username: "{{ satellite_username | default(omit) }}"
         password: "{{ satellite_password | default(omit) }}"
@@ -26,18 +79,43 @@
         validate_certs: "{{ satellite_validate_certs | default(omit) }}"
         organizations: "{{ satellite_organization }}"
         locations: "{{ satellite_location }}"
+      loop: "{{ ovirt_instances }}"
+      loop_control:
+        label: "{{ item.name }}"
 
-    - name: Print info
-      ansible.builtin.debug:
-        msg: System {{ vm_name }} has mac_address {{ mac_address }}
-
-    - name: Add '{{ vm_name }}' to post_install group
+    - name: Add instance to the post_install group
       ansible.builtin.add_host:
-        hostname: "{{ vm_name }}.{{ domain_name }}"
+        hostname: "{{ item.name }}.{{ domain_name }}"
         groups: post_install
+      loop: "{{ ovirt_instances }}"
+      loop_control:
+        label: "{{ item.name }}"
 
-    - name: Show host in post_install group
-      ansible.builtin.debug: var=groups['post_install']
+    - name: Build the oVirt VM definitions
+      ansible.builtin.set_fact:
+        ovirt_vms: "{{ ovirt_vms | default([]) + [vm_def] }}"
+      vars:
+        vm_def:
+          name: "{{ item.name }}.{{ domain_name }}"
+          cluster: Default
+          memory: 4GiB
+          cpu_cores: 2
+          cores: 2
+          state: running
+          template: Default
+          storage_domain: CEPH
+          graphical_console:
+            protocol:
+              - vnc
+          boot_devices:
+            - network
+          nics:
+            - name: nic1
+              mac_address: "{{ item.mac_address }}"
+              profile_name: apps
+      loop: "{{ ovirt_instances }}"
+      loop_control:
+        label: "{{ item.name }}"
 
   tasks:
     - name: Import-role ovirt.vm_infra
@@ -45,31 +123,10 @@
         name: ovirt.ovirt.vm_infra
       vars:
         debug_vm_create: true
-        vms:
-          - name: "{{ vm_name }}.{{ domain_name }}"
-            cluster: Default
-            memory: 4GiB
-            cpu_cores: 2
-            cores: 2
-            state: running
-            template: Default
-            storage_domain: CEPH
-            graphical_console:
-              protocol:
-                - vnc
-            boot_devices:
-              - network
-            nics:
-              - name: nic1
-                mac_address: "{{ mac_address }}"
-                profile_name: apps
-  post_tasks:
-    - name: Add targeted vm to post_install inventory group
-      ansible.builtin.add_host:
-        hostname: "{{ vm_name }}.{{ domain_name }}"
-        groups: post_install
+        vms: "{{ ovirt_vms }}"
 
-    - name: Check if {{ vm_name }}.{{ domain_name }} has been created
+  post_tasks:
+    - name: Check whether the host exists in Satellite
       redhat.satellite.host_info:
         username: "{{ satellite_username | default(omit) }}"
         password: "{{ satellite_password | default(omit) }}"
@@ -81,16 +138,8 @@
 
     - name: Show host_search result
       ansible.builtin.debug:
-        msg: "Host {{ vm_name }}.{{ domain_name }} has been created!"
-      when: host_search_result is ansible.builtin.success
-
-#    - name: Remove Discovery Rule
-#      theforeman.foreman.discovery_rule:
-#        username: "{{ satellite_username | default(omit) }}"
-#        password: "{{ satellite_password | default(omit) }}"
-#        server_url: "{{ satellite_server_url | default(omit) }}"
-#        validate_certs: "{{ satellite_validate_certs | default(omit) }}"
-#        name: "{{ vm_name }}-discovery_rule"
-#        state: 'absent'
-#
-# vm_name: "{{ lookup('community.general.random_pet') ~ '.' ~ domain_name }}"
+        msg: "Host {{ item.item }} has been created!"
+      loop: "{{ host_search_result.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+      when: item is ansible.builtin.success
