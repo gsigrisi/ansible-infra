@@ -35,14 +35,13 @@
       loop: "{{ os_requests }}"
       when: survey_mode | bool
 
-    - name: Build the requested instances
+    - name: Build the requested instance names
       ansible.builtin.set_fact:
-        ovirt_instances: "{{ ovirt_instances | default([]) + [instance] }}"
+        ovirt_instance_specs: "{{ ovirt_instance_specs | default([]) + [spec] }}"
       vars:
-        instance:
+        spec:
           os_major: "{{ item.0.os_major }}"
           name: "{{ instance_name_prefix }}-rhel{{ item.0.os_major }}-{{ lookup('community.general.random_pet', words=1) }}-{{ '%02d' | format(item.1 | int) }}"
-          mac_address: "{{ '56:6f:30' | community.general.random_mac(seed=instance_name_prefix ~ '-rhel' ~ item.0.os_major ~ '-' ~ item.1) }}"
       loop: "{{ os_requests | product(range(1, 21) | list) | list }}"
       when:
         - survey_mode | bool
@@ -50,6 +49,19 @@
         - item.1 | int <= item.0.count | int
       loop_control:
         label: "RHEL {{ item.0.os_major }} {{ '%02d' | format(item.1 | int) }}"
+
+    - name: Build the requested instances
+      ansible.builtin.set_fact:
+        ovirt_instances: "{{ ovirt_instances | default([]) + [instance] }}"
+      vars:
+        instance:
+          os_major: "{{ item.os_major }}"
+          name: "{{ item.name }}"
+          mac_address: "{{ '56:6f:30' | community.general.random_mac(seed=item.name) }}"
+      loop: "{{ ovirt_instance_specs | default([]) }}"
+      when: survey_mode | bool
+      loop_control:
+        label: "{{ item.name }}"
 
     - name: Build one instance
       ansible.builtin.set_fact:
