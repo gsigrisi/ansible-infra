@@ -2,3 +2,7 @@
 roles:
   - src: ryandaniels.create_users
     name: gsigrisi.create_users
+
+  - src: RedHatOfficial.rhel10_ospp
+  - src: RedHatOfficial.rhel9_ospp
+  - src: RedHatOfficial.rhel8_ospp
