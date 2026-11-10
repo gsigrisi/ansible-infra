@@ -1,11 +1,14 @@
 ---
 collections:
+  - name: ansible.controller
+  - name: ansible.platform
   - name: awx.awx
   - name: ansible.posix
   - name: community.general
   - name: community.vmware
   - name: community.hashi_vault
   - name: containers.podman
+  - name: infra.ah_configuration
   - name: infra.aap_configuration
   - name: infra.ee_utilities
   - name: ovirt.ovirt
