@@ -1,3 +1,4 @@
+---
 - name: Playbook to create custom EE
   hosts: "{{ targeted_host | default('localhost') }}"
   gather_facts: false
@@ -22,13 +23,13 @@
     ee_verbosity: 3
 
     ee_build_arg_defaults:
-       ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: -vv --pre -c
+      ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: -vv --pre -c
 
     ee_list:
-      - name: custom_dev
+      - name: custom
         alt_name: Custom DEV EE
         tags:
-          - build-dev
+          - latest
         dependencies:
           python_interpreter:
             python_path: "/usr/bin/python3.12"
@@ -60,6 +61,7 @@
               - name: community.vmware
               - name: community.hashi_vault
               - name: containers.podman
+              - name: infra.ah_configuration
               - name: infra.aap_configuration
               - name: infra.ee_utilities
               - name: kubernetes.core
@@ -70,9 +72,6 @@
               - name: redhat.satellite_operations
               - name: ovirt.ovirt
               - name: vmware.vmware_rest
-          exclude:
-            system:
-              - openshift-clients
 
         additional_build_steps:
           prepend_base: []
@@ -86,8 +85,7 @@
 
         build_steps:
           append_final:
-            - RUN curl -sL https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz | tar -xz -C /usr/bin
-            - RUN chmod +x /usr/bin/oc
+            - RUN rm -f /etc/ansible/ansible.cfg
           prepend_base:
             - RUN microdnf install -y python3-pip && microdnf clean all
         options:
