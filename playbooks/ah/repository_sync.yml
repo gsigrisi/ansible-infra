@@ -25,9 +25,9 @@
         scope: "write"
         state: present
         validate_certs: false
-        controller_host: "{{ controller_hostname }}"
-        controller_username: "{{ controller_username }}"
-        controller_password: "{{ controller_password }}"
+        aap_hostname: "{{ controller_hostname }}"
+        aap_username: "{{ controller_username }}"
+        aap_password: "{{ controller_password }}"
 
   roles:
     - {role: collection_repository_sync }
