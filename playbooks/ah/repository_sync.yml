@@ -17,10 +17,10 @@
       - name: community
         wait: true
         timeout: 1200
-    
+
   pre_tasks:
     - name: Create a new token using controller username/password
-      ansible.controller.token:
+      ansible.platform.token:
         description: 'admin token for pah repositories sync'
         scope: "write"
         state: present
