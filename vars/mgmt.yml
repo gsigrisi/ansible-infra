@@ -59,12 +59,6 @@ satellite_composite_content_views:
     lfe:
       - LAB
 
-# cv:
-#  - name: cv-capsules
-#  - name: cv-rhel10
-#  - name: cv-rhel9
-#  - name: cv-rhel8
-
 satellite_content_views:
 #  - name: cv-capsules
 #    description: "Red Hat Capsules Content"
@@ -175,31 +169,6 @@ satellite_content_views:
     repository_sets:
       - name: Red Hat Enterprise Linux 8 for x86_64 - BaseOS - Extended Update Support (RPMs)
         releasever: 8.6
-
-        #  - name: ccv-rhel10
-        #    description: "CCV RHEL10 SOE"
-        #    lifecycle_environment: "LAB"
-        #    components:
-        #      - content_view: cv-rhel10
-        #        latest: true
-        #
-        #  - name: ccv-rhel9
-        #    description: "CCV RHEL9 SOE"
-        #    lifecycle_environment: "LAB"
-        #    components:
-        #      - content_view: cv-rhel9
-        #        latest: true
-        #      - content_view: cv-rhel9_extras
-        #        latest: true
-        #
-        #  - name: ccv-rhel8
-        #    description: "CCV RHEL8 SOE"
-        #    lifecycle_environment: "LAB"
-        #    components:
-        #      - content_view: cv-rhel8
-        #        latest: true
-        #      - content_view: cv-rhel8_extras
-        #        latest: true
 
 sync_repos: false
 satellite_timeout: 1800
