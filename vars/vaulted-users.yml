@@ -1,0 +1,114 @@
+_teams:
+  - name: "cyber"
+    members:
+      - username: "lucas"
+        password: "LucasCloud#4721"
+        #groups: "developers"
+        #role: "backend-developer"
+        ssh_key: "{{ vaulted_ssh_key }}"
+        use_sudo: yes
+        is_sudo: true
+        user_state: present
+        #use_sudo_nopass: yes
+        servers:
+          - "{{ targeted_host }}"
+
+  - name: "gisdev"
+    members:
+      - username: "riley_smith"
+        password: "RileyFull#2576"
+        #groups: "developers"
+        #role: "fullstack-developer"
+        use_sudo: "yes"
+        is_sudo: true
+        user_state: present
+        #use_sudo_nopass: "yes"
+        ssh_key: "{{ vaulted_ssh_key }}"
+        servers:
+          - "{{ targeted_host }}"
+
+  - name: "gisinfra"
+    members:
+      - username: "casey_brown"
+        password: "CaseyAdmin#9043"
+        #groups: "super-admin"
+        #role: "platform-admin"
+        use_sudo: "yes"
+        is_sudo: true
+        user_state: present
+        #use_sudo_nopass: "yes"
+        ssh_key: "{{ vaulted_ssh_key }}"
+        servers:
+          - "{{ targeted_host }}"
+
+  - name: "gislinux"
+    members:
+      - username: "taylor_lee"
+        password: "TaylorCloud#7392"
+        #groups: "devops"
+        #role: "sre"
+        use_sudo: "yes"
+        is_sudo: true
+        user_state: present
+        #use_sudo_nopass: "yes"
+        ssh_key: "{{ vaulted_ssh_key }}"
+        servers:
+          - "{{ targeted_host }}"
+
+  - name: "knowmadmood"
+    members:
+      - username: "alice_wong"
+        password: "AliceSecure2026!"
+        #groups: "wheel"
+        ssh_key: "{{ vaulted_ssh_key }}"
+        #role: "devops-engineer"
+        use_sudo: yes
+        is_sudo: false
+        user_state: present
+        #use_sudo_nopass: no
+        servers:
+          - "{{ targeted_host }}"
+
+  - name: "networking"
+    members:
+      - username: "marcus_chen"
+        password: "MarcusCloud#4721"
+        #groups: "developers"
+        ssh_key: "{{ vaulted_ssh_key }}"
+        #role: "backend-developer"
+        use_sudo: yes
+        is_sudo: true
+        user_state: present
+        #use_sudo_nopass: yes
+        servers:
+          - "{{ targeted_host }}"
+
+  - name: "developers"
+    members:
+      - username: "sarah_lee"
+        password: "SarahDevSecure789!"
+        #groups: "developers"
+        ssh_key: "{{ vaulted_ssh_key }}"
+        #role: "frontend-developer"
+        use_sudo: yes
+        is_sudo: true
+        #use_sudo_nopass: no
+        user_state: present
+        servers:
+          - "{{ targeted_host }}"
+
+  - name: "platform"
+    members:
+      - username: "bob_smith"
+        password: "BobPlatform456!"
+        #groups: "developers"
+        ssh_key: "{{ vaulted_ssh_key }}"
+        #role: "platform-engineer"
+        use_sudo: yes
+        is_sudo: false
+        user_state: present
+        #use_sudo_nopass: no
+        servers:
+          - "{{ targeted_host }}"
+
+_users: "{{ _teams | map(attribute='members') | flatten }}"
