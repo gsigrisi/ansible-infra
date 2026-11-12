@@ -8,7 +8,7 @@ controller_templates:
   job_type: run
   inventory: 5
   project: 8
-  playbook: playbooks/satellite/delete_host.yml
+  playbook: playbooks/infra/delete_host.yml
   scm_branch:
   forks: 0
   limit:
