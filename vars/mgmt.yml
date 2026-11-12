@@ -122,17 +122,9 @@ satellite_content_views:
       - { name: 'Red Hat Ceph Storage Tools 5 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Red Hat Ceph Storage Tools 6 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Red Hat Ceph Storage Tools 7 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
-      - { name: 'Red Hat Satellite 6.17 for RHEL 9 x86_64 RPMs', product: 'Red Hat Satellite' }
-      - { name: 'Red Hat Satellite 6.18 for RHEL 9 x86_64 RPMs', product: 'Red Hat Satellite' }
       - { name: 'Red Hat Satellite 6.19 for RHEL 9 x86_64 RPMs', product: 'Red Hat Satellite' }
-      - { name: 'Red Hat Satellite Capsule 6.17 for RHEL 9 x86_64 RPMs', product: 'Red Hat Satellite Capsule' }
-      - { name: 'Red Hat Satellite Capsule 6.18 for RHEL 9 x86_64 RPMs', product: 'Red Hat Satellite Capsule' }
       - { name: 'Red Hat Satellite Capsule 6.19 for RHEL 9 x86_64 RPMs', product: 'Red Hat Satellite Capsule' }
-      - { name: 'Red Hat Satellite Maintenance 6.17 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
-      - { name: 'Red Hat Satellite Maintenance 6.18 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Red Hat Satellite Maintenance 6.19 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
-      - { name: 'Red Hat Satellite Utils 6.17 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
-      - { name: 'Red Hat Satellite Utils 6.18 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
       - { name: 'Red Hat Satellite Utils 6.19 for RHEL 9 x86_64 RPMs', product: 'Red Hat Enterprise Linux for x86_64' }
 
   - name: cv-rhel8
