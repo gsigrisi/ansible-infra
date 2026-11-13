@@ -1,0 +1,8 @@
+dnspython
+awxkit
+jmespath
+petname
+requests
+pyvmomi==8.0.2
+ovirt-engine-sdk-python
+hvac

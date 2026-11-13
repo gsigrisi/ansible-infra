@@ -7,7 +7,7 @@
     - "{{ playbook_dir }}/../../vaults/{{ env }}-vault.yml"
 
   vars:
-    survey_mode: "{{ rhel8_instances is defined or rhel9_instances is defined or rhel10_instances is defined }}"
+    requested_instance_count: "{{ (rhel8_instances | default(0) | int) + (rhel9_instances | default(0) | int) + (rhel10_instances | default(0) | int) }}"
     os_requests:
       - os_major: 8
         count: "{{ rhel8_instances | default(0) }}"
@@ -26,14 +26,12 @@
       ansible.builtin.assert:
         that:
           - instance_name_prefix is match('^[A-Za-z0-9][A-Za-z0-9-]{0,20}$')
-          - (rhel8_instances | default(0) | int + rhel9_instances | default(0) | int + rhel10_instances | default(0) | int) > 0
           - item.count | int >= 0
           - item.count | int <= 20
         fail_msg: >-
-          Set at least one of rhel8_instances, rhel9_instances, or rhel10_instances
-          to a number from 1 to 20.
+          Each of rhel8_instances, rhel9_instances, and rhel10_instances
+          must be a number from 0 to 20.
       loop: "{{ os_requests }}"
-      when: survey_mode | bool
 
     - name: Build the requested instance names
       ansible.builtin.set_fact:
@@ -44,11 +42,19 @@
           name: "{{ instance_name_prefix }}-rhel{{ item.0.os_major }}-{{ lookup('community.general.random_pet', words=1) }}-{{ '%02d' | format(item.1 | int) }}"
       loop: "{{ os_requests | product(range(1, 21) | list) | list }}"
       when:
-        - survey_mode | bool
         - item.0.count | int > 0
         - item.1 | int <= item.0.count | int
       loop_control:
         label: "RHEL {{ item.0.os_major }} {{ '%02d' | format(item.1 | int) }}"
+
+    - name: Build one default oVirt instance name
+      ansible.builtin.set_fact:
+        ovirt_instance_specs:
+          - os_major: "{{ default_os_major }}"
+            name: "{{ instance_name_prefix }}-rhel{{ default_os_major }}-{{ lookup('community.general.random_pet', words=1) }}-01"
+      vars:
+        default_os_major: "{{ os_major | default(9) }}"
+      when: requested_instance_count | int == 0
 
     - name: Build the requested instances
       ansible.builtin.set_fact:
@@ -59,17 +65,9 @@
           name: "{{ item.name }}"
           mac_address: "{{ '56:6f:30' | community.general.random_mac(seed=item.name) }}"
       loop: "{{ ovirt_instance_specs | default([]) }}"
-      when: survey_mode | bool
+      when: ovirt_instance_specs | default([]) | length > 0
       loop_control:
         label: "{{ item.name }}"
-
-    - name: Build one instance
-      ansible.builtin.set_fact:
-        ovirt_instances:
-          - os_major: "{{ os_major }}"
-            name: "{{ instance_name_prefix }}-rhel{{ os_major }}-{{ lookup('community.general.random_pet', words=1) }}-01"
-            mac_address: "{{ '56:6f:30' | community.general.random_mac }}"
-      when: not survey_mode | bool
 
     - name: Show instances to create
       ansible.builtin.debug:
@@ -94,7 +92,7 @@
       loop: "{{ ovirt_instances }}"
       loop_control:
         label: "{{ item.name }}"
-      when: create_discovery_rule | default(true) | bool
+      when: create_discovery_rule | default(false) | bool
 
     - name: Add instance to the post_install group
       ansible.builtin.add_host:
@@ -103,7 +101,7 @@
       loop: "{{ ovirt_instances }}"
       loop_control:
         label: "{{ item.name }}"
-      when: create_discovery_rule | default(true) | bool
+      when: create_discovery_rule | default(false) | bool
 
     - name: Build the oVirt VM definitions
       ansible.builtin.set_fact:
@@ -149,7 +147,7 @@
         name: "{{ item }}"
       register: host_search_result
       loop: "{{ groups['post_install'] | default([]) }}"
-      when: create_discovery_rule | default(true) | bool
+      when: create_discovery_rule | default(false) | bool
 
     - name: Show host_search result
       ansible.builtin.debug:
@@ -158,5 +156,5 @@
       loop_control:
         label: "{{ item.item }}"
       when:
-        - create_discovery_rule | default(true) | bool
+        - create_discovery_rule | default(false) | bool
         - item is ansible.builtin.success

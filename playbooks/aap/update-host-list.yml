@@ -1,5 +1,5 @@
 ---
-- name: Update host list in job_template host-delete
+- name: Update job_templates is AAP
   hosts: localhost
   connection: local
   gather_facts: false

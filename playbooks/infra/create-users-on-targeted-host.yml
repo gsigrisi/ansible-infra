@@ -128,3 +128,4 @@
 
   roles:
     - "{{ playbook_dir }}/../../roles/pinguozzo.create-users"
+...
