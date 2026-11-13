@@ -9,7 +9,17 @@
       password: "{{ satellite_password }}"
       server_url: "{{ satellite_server_url }}"
       validate_certs: no
+    redhat.satellite.host_info:
+      username: "{{ satellite_username }}"
+      password: "{{ satellite_password }}"
+      server_url: "{{ satellite_server_url }}"
+      validate_certs: no
     redhat.satellite.discovery_rule:
+      username: "{{ satellite_username }}"
+      password: "{{ satellite_password }}"
+      server_url: "{{ satellite_server_url }}"
+      validate_certs: no
+    redhat.satellite.resource_info:
       username: "{{ satellite_username }}"
       password: "{{ satellite_password }}"
       server_url: "{{ satellite_server_url }}"
@@ -26,22 +36,12 @@
         fail_msg: "hostname(s) must be defined"
 
   tasks:
-    - name: delete vm(s)
+    - name: Normalize the virtual machine names
+      ansible.builtin.set_fact:
+        vm_names: "{{ [vm_name] if vm_name is string else vm_name }}"
+
+    - name: Find and delete each virtual machine
       block:
-        - name: "Delete {% if vm_name |length > 1 %}hosts{% else %}host{% endif %}{{':'}} {{ vm_name }}"
-          redhat.satellite.host:
-            name: "{{ item }}"
-            state: absent
-          loop: "{{ vm_name }}"
-
-        - name: Delete the discovery rule for each host
-          redhat.satellite.discovery_rule:
-            name: "{{ (item.split('.') | first) }}-discovery_rule"
-            state: absent
-          loop: "{{ vm_name }}"
-          loop_control:
-            label: "{{ (item.split('.') | first) }}-discovery_rule"
-
         - name: Log in to oVirt
           ovirt.ovirt.ovirt_auth:
             url: "{{ engine_url | default(lookup('env', 'OVIRT_URL')) | default(omit) }}"
@@ -52,12 +52,97 @@
             insecure: "{{ engine_insecure | default(true) }}"
           when: ovirt_auth is undefined or not ovirt_auth
 
-        - name: Remove VM from oVirt
+        - name: Check whether the virtual machine is in oVirt
+          ovirt.ovirt.ovirt_vm_info:
+            auth: "{{ ovirt_auth }}"
+            pattern: "name={{ item }}"
+          loop: "{{ vm_names }}"
+          loop_control:
+            label: "{{ item }}"
+          register: ovirt_vm_lookup
+
+        - name: Check whether the host is in Satellite
+          redhat.satellite.host_info:
+            name: "{{ item }}"
+          loop: "{{ vm_names }}"
+          loop_control:
+            label: "{{ item }}"
+          register: satellite_host_lookup
+
+        - name: Check whether the discovery rule is in Satellite
+          redhat.satellite.resource_info:
+            resource: discovery_rules
+            search: "name = \"{{ (item.split('.') | first) }}-discovery_rule\""
+          loop: "{{ vm_names }}"
+          loop_control:
+            label: "{{ (item.split('.') | first) }}-discovery_rule"
+          register: satellite_rule_lookup
+
+        - name: Record where each virtual machine is running
+          ansible.builtin.set_fact:
+            vm_locations: "{{ vm_locations | default([]) + [location] }}"
+          vars:
+            ovirt_result: "{{ ovirt_vm_lookup.results[idx] }}"
+            satellite_result: "{{ satellite_host_lookup.results[idx] }}"
+            rule_result: "{{ satellite_rule_lookup.results[idx] }}"
+            location:
+              name: "{{ item }}"
+              discovery_rule: "{{ (item.split('.') | first) }}-discovery_rule"
+              in_ovirt: "{{ ovirt_result.ovirt_vms | default([]) | selectattr('name', 'equalto', item) | list | length > 0 }}"
+              in_satellite_host: "{{ satellite_result.host is mapping }}"
+              has_discovery_rule: "{{ rule_result.resources | default([]) | length > 0 }}"
+          loop: "{{ vm_names }}"
+          loop_control:
+            index_var: idx
+            label: "{{ item }}"
+
+        - name: Show where each virtual machine is running
+          ansible.builtin.debug:
+            msg: >-
+              {{ item.name }}:
+              oVirt={{ item.in_ovirt }},
+              Satellite host={{ item.in_satellite_host }},
+              discovery rule={{ item.has_discovery_rule }}
+          loop: "{{ vm_locations }}"
+          loop_control:
+            label: "{{ item.name }}"
+
+        - name: Require each virtual machine to exist in oVirt or Satellite
+          ansible.builtin.assert:
+            that:
+              - item.in_ovirt | bool or item.in_satellite_host | bool or item.has_discovery_rule | bool
+            fail_msg: "{{ item.name }} is not in oVirt or Satellite."
+          loop: "{{ vm_locations }}"
+          loop_control:
+            label: "{{ item.name }}"
+
+        - name: Delete the Satellite host
+          redhat.satellite.host:
+            name: "{{ item.name }}"
+            state: absent
+          loop: "{{ vm_locations }}"
+          loop_control:
+            label: "{{ item.name }}"
+          when: item.in_satellite_host | bool
+
+        - name: Delete the Satellite discovery rule
+          redhat.satellite.discovery_rule:
+            name: "{{ item.discovery_rule }}"
+            state: absent
+          loop: "{{ vm_locations }}"
+          loop_control:
+            label: "{{ item.discovery_rule }}"
+          when: item.has_discovery_rule | bool
+
+        - name: Remove the virtual machine from oVirt
           ovirt.ovirt.ovirt_vm:
             auth: "{{ ovirt_auth }}"
-            name: "{{ item }}"
+            name: "{{ item.name }}"
             state: absent
-          loop: "{{ vm_name }}"
+          loop: "{{ vm_locations }}"
+          loop_control:
+            label: "{{ item.name }}"
+          when: item.in_ovirt | bool
 
       always:
         - name: Log out of oVirt
@@ -66,4 +151,4 @@
             ovirt_auth: "{{ ovirt_auth }}"
           when: ovirt_auth is defined
 
-# ansible-playbook playbooks/satellite/delete_host.yml -e '{"vm_name": [fqdn1,fqdn2]}'
+# ansible-playbook playbooks/infra/delete_host.yml -e env=mgmt -e '{"vm_name": [fqdn1,fqdn2]}'
