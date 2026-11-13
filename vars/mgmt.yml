@@ -265,9 +265,13 @@ satellite_products:
       - name: Red Hat Enterprise Linux 8 for x86_64 - AppStream (RPMs)
         releasever: 8.6
       - name: Red Hat Enterprise Linux 8 for x86_64 - AppStream (RPMs)
+        releasever: 8.5
+      - name: Red Hat Enterprise Linux 8 for x86_64 - AppStream (RPMs)
         releasever: "8.10"
       - name: Red Hat Enterprise Linux 8 for x86_64 - BaseOS (RPMs)
         releasever: 8.6
+      - name: Red Hat Enterprise Linux 8 for x86_64 - BaseOS (RPMs)
+        releasever: 8.5
       - name: Red Hat Enterprise Linux 8 for x86_64 - BaseOS (RPMs)
         releasever: "8.10"
       - name: Red Hat Enterprise Linux 8 for x86_64 - Supplementary (RPMs)
