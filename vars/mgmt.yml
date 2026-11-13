@@ -30,23 +30,21 @@ satellite_activation_keys:
         override: enabled
 
 ccv:
-- name: ccv-rhel10
-  lfe:
-    - LAB
-  cv:
-    - cv-rhel10
-
-- name: ccv-rhel9
-  lfe:
-    - LAB
-  cv:
-    - cv-rhel9
-
-- name: ccv-rhel8
-  lfe:
-    - LAB
-  cv:
-    - cv-rhel8
+  - name: ccv-rhel10
+    lfe:
+      - LAB
+    cv:
+      - cv-rhel10
+  - name: ccv-rhel9
+    lfe:
+      - LAB
+    cv:
+      - cv-rhel9
+  - name: ccv-rhel8
+    lfe:
+      - LAB
+    cv:
+      - cv-rhel8
 
 satellite_composite_content_views:
   - name: ccv-rhel10
