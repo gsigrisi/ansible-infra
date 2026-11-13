@@ -1,6 +1,6 @@
 {
    "name": "Create oVirt instances",
-   "description": "Choose how many RHEL 8, 9, and 10 instances to create. Names look like lab-rhel8-otter-01.",
+   "description": "Choose how many RHEL 8, 9, and 10 instances to create. Names look like lab-rhel8-otter-01. Leave the discovery rule enabled to register them in Satellite.",
    "spec": [
       {
         "question_name": "RHEL 8 instances",
@@ -36,6 +36,18 @@
         "max": 20,
         "default": 0,
         "choices": "",
+        "new_question": true
+      },
+      {
+        "question_name": "Create Satellite discovery rule",
+        "question_description": "Create a Satellite discovery rule for each instance. Choose false to create the oVirt virtual machine only.",
+        "required": true,
+        "type": "multiplechoice",
+        "variable": "create_discovery_rule",
+        "min": null,
+        "max": null,
+        "default": "true",
+        "choices": "true\nfalse",
         "new_question": true
       }
    ]

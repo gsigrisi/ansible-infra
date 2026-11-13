@@ -94,6 +94,7 @@
       loop: "{{ ovirt_instances }}"
       loop_control:
         label: "{{ item.name }}"
+      when: create_discovery_rule | default(true) | bool
 
     - name: Add instance to the post_install group
       ansible.builtin.add_host:
@@ -102,6 +103,7 @@
       loop: "{{ ovirt_instances }}"
       loop_control:
         label: "{{ item.name }}"
+      when: create_discovery_rule | default(true) | bool
 
     - name: Build the oVirt VM definitions
       ansible.builtin.set_fact:
@@ -146,12 +148,15 @@
         validate_certs: "{{ satellite_validate_certs | default(omit) }}"
         name: "{{ item }}"
       register: host_search_result
-      loop: "{{ groups['post_install'] }}"
+      loop: "{{ groups['post_install'] | default([]) }}"
+      when: create_discovery_rule | default(true) | bool
 
     - name: Show host_search result
       ansible.builtin.debug:
         msg: "Host {{ item.item }} has been created!"
-      loop: "{{ host_search_result.results }}"
+      loop: "{{ host_search_result.results | default([]) }}"
       loop_control:
         label: "{{ item.item }}"
-      when: item is ansible.builtin.success
+      when:
+        - create_discovery_rule | default(true) | bool
+        - item is ansible.builtin.success

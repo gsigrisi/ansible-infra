@@ -11,7 +11,7 @@ _teams:
         user_state: present
         #use_sudo_nopass: yes
         servers:
-          - "{{ targeted_host }}"
+          - all
 
   - name: "gisdev"
     members:
@@ -25,7 +25,7 @@ _teams:
         #use_sudo_nopass: "yes"
         ssh_key: "{{ vaulted_ssh_key }}"
         servers:
-          - "{{ targeted_host }}"
+          - all
 
   - name: "gisinfra"
     members:
@@ -39,7 +39,7 @@ _teams:
         #use_sudo_nopass: "yes"
         ssh_key: "{{ vaulted_ssh_key }}"
         servers:
-          - "{{ targeted_host }}"
+          - all
 
   - name: "gislinux"
     members:
@@ -53,7 +53,7 @@ _teams:
         #use_sudo_nopass: "yes"
         ssh_key: "{{ vaulted_ssh_key }}"
         servers:
-          - "{{ targeted_host }}"
+          - all
 
   - name: "knowmadmood"
     members:
@@ -67,7 +67,7 @@ _teams:
         user_state: present
         #use_sudo_nopass: no
         servers:
-          - "{{ targeted_host }}"
+          - all
 
   - name: "networking"
     members:
@@ -81,7 +81,7 @@ _teams:
         user_state: present
         #use_sudo_nopass: yes
         servers:
-          - "{{ targeted_host }}"
+          - all
 
   - name: "developers"
     members:
@@ -94,8 +94,9 @@ _teams:
         is_sudo: true
         #use_sudo_nopass: no
         user_state: present
+        #use_sudo_nopass: no
         servers:
-          - "{{ targeted_host }}"
+          - all
 
   - name: "platform"
     members:
@@ -109,6 +110,6 @@ _teams:
         user_state: present
         #use_sudo_nopass: no
         servers:
-          - "{{ targeted_host }}"
+          - all
 
 _users: "{{ _teams | map(attribute='members') | flatten }}"

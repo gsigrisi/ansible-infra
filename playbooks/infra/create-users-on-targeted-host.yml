@@ -1,0 +1,130 @@
+---
+- name: Read Vault users and add the targeted host
+  hosts: localhost
+  gather_facts: false
+  vars:
+    engine_name: ansible-infra
+    base_path: users-credentials/teams
+  vars_files:
+    - "{{ playbook_dir }}/../../vaults/{{ env }}-vault.yml"
+
+  tasks:
+    - name: Set targeted host list
+      ansible.builtin.set_fact:
+        targeted_host_list: "{{ [targeted_host] if targeted_host is defined else ([targeted_hosts] if targeted_hosts is string else targeted_hosts) }}"
+
+    - name: List teams in Vault
+      ansible.builtin.command:
+        cmd: vault kv list -format=json {{ engine_name }}/{{ base_path }}
+      environment:
+        VAULT_ADDR: "{{ vault_url }}"
+        VAULT_SKIP_VERIFY: "1"
+        VAULT_ROLE_ID: "{{ vault_role_id }}"
+        VAULT_SECRET_ID: "{{ vault_secret_id }}"
+      register: vault_teams_raw
+      changed_when: false
+
+    - name: Parse teams
+      ansible.builtin.set_fact:
+        vault_teams: "{{ vault_teams_raw.stdout | from_json | map('regex_replace', '/$', '') }}"
+
+    - name: List users in each team
+      ansible.builtin.command:
+        cmd: vault kv list -format=json {{ engine_name }}/{{ base_path }}/{{ item }}
+      environment:
+        VAULT_ADDR: "{{ vault_url }}"
+        VAULT_SKIP_VERIFY: "1"
+        VAULT_ROLE_ID: "{{ vault_role_id }}"
+        VAULT_SECRET_ID: "{{ vault_secret_id }}"
+      loop: "{{ vault_teams }}"
+      register: vault_users_list
+      changed_when: false
+
+    - name: Build Vault user paths
+      ansible.builtin.set_fact:
+        users: >-
+          {{
+            users | default([]) +
+            (
+              item.stdout | from_json
+              | map('regex_replace', '^(.*)$', item.item ~ '/' ~ '\1')
+              | list
+            )
+          }}
+      loop: "{{ vault_users_list.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    - name: Show Vault user paths
+      ansible.builtin.debug:
+        msg: "{{ users }}"
+
+    - name: Read each user secret from Vault
+      ansible.builtin.command:
+        cmd: vault kv get -format=json {{ engine_name }}/{{ base_path }}/{{ item }}
+      environment:
+        VAULT_ADDR: "{{ vault_url }}"
+        VAULT_SKIP_VERIFY: "1"
+        VAULT_ROLE_ID: "{{ vault_role_id }}"
+        VAULT_SECRET_ID: "{{ vault_secret_id }}"
+      loop: "{{ users }}"
+      loop_control:
+        label: "{{ item }}"
+      register: vault_user_secrets
+      changed_when: false
+      no_log: true
+
+    - name: Build teams from Vault secrets
+      ansible.builtin.set_fact:
+        teams: >-
+          {{
+            (teams | default([])) +
+            [{
+              'name': item.item.split('/')[0],
+              'members': [{
+                'username': secret.username | default(item.item.split('/')[1]),
+                'password': secret.password | default(''),
+                'ssh_key': secret.ssh_key | default(vaulted_ssh_keys | default('')),
+                'use_sudo': secret.use_sudo | default('yes'),
+                'is_sudo': secret.is_sudo | default(true),
+                'user_state': secret.user_state | default('present'),
+                'servers': [secret.servers] if secret.servers is string else (secret.servers | default(['all']))
+              }]
+            }]
+          }}
+      vars:
+        secret: "{{ (item.stdout | from_json).data.data }}"
+      loop: "{{ vault_user_secrets.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+      no_log: true
+
+    - name: Add targeted host to inventory
+      ansible.builtin.add_host:
+        name: "{{ item }}"
+        groups: init
+      loop: "{{ targeted_host_list }}"
+
+    - name: Wait for the targeted host
+      ansible.builtin.wait_for_connection:
+        timeout: 900
+      delegate_to: "{{ item }}"
+      loop: "{{ groups['init'] }}"
+
+- name: Create Linux users on the targeted host
+  hosts: init
+  become: true
+  gather_facts: true
+  vars:
+    users: "{{ hostvars['localhost']['teams'] | map(attribute='members') | flatten }}"
+
+  pre_tasks:
+    - name: Show users from Vault
+      ansible.builtin.debug:
+        msg: "{{ item.username }}"
+      loop: "{{ users }}"
+      loop_control:
+        label: "{{ item.username }}"
+
+  roles:
+    - "{{ playbook_dir }}/../../roles/pinguozzo.create-users"
