@@ -1,6 +1,6 @@
 {
    "name": "Create oVirt instances",
-   "description": "By default this creates one RHEL 10 virtual machine in oVirt and does not create a Satellite discovery rule. When every count is 0, one RHEL 10 virtual machine is still created. oVirt-only names look like lab-ovirt-rhel10-otter-01. Names with a discovery rule look like lab-rhel10-otter-01.",
+   "description": "By default this creates one RHEL 10 virtual machine in oVirt and does not create a Satellite discovery rule. When every count is 0, one RHEL 10 virtual machine is still created. oVirt-only names look like lab-ovirt-rhel10-otter-01. Names with a discovery rule look like lab-rhel10-otter-01. Generic Linux names look like lab-ovirt-linux-otter-01.",
    "spec": [
       {
         "question_name": "RHEL 8 instances",
@@ -35,6 +35,18 @@
         "min": 0,
         "max": 20,
         "default": 1,
+        "choices": "",
+        "new_question": true
+      },
+      {
+        "question_name": "Generic Linux instances",
+        "question_description": "Number of generic Linux instances to create. Use 0 to skip. A discovery rule for these instances uses the RHEL 10 hostgroup.",
+        "required": true,
+        "type": "integer",
+        "variable": "linux_instances",
+        "min": 0,
+        "max": 20,
+        "default": 0,
         "choices": "",
         "new_question": true
       },

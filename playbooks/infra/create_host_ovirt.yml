@@ -7,14 +7,20 @@
     - "{{ playbook_dir }}/../../vaults/{{ env }}-vault.yml"
 
   vars:
-    requested_instance_count: "{{ (rhel8_instances | default(0) | int) + (rhel9_instances | default(0) | int) + (rhel10_instances | default(0) | int) }}"
+    requested_instance_count: "{{ (rhel8_instances | default(0) | int) + (rhel9_instances | default(0) | int) + (rhel10_instances | default(0) | int) + (linux_instances | default(0) | int) }}"
     os_requests:
-      - os_major: 8
+      - os_label: rhel8
+        os_major: 8
         count: "{{ rhel8_instances | default(0) }}"
-      - os_major: 9
+      - os_label: rhel9
+        os_major: 9
         count: "{{ rhel9_instances | default(0) }}"
-      - os_major: 10
+      - os_label: rhel10
+        os_major: 10
         count: "{{ rhel10_instances | default(0) }}"
+      - os_label: linux
+        os_major: 10
+        count: "{{ linux_instances | default(0) }}"
 
   pre_tasks:
     - name: Set the default instance name prefix
@@ -33,8 +39,8 @@
           - item.count | int >= 0
           - item.count | int <= 20
         fail_msg: >-
-          Each of rhel8_instances, rhel9_instances, and rhel10_instances
-          must be a number from 0 to 20.
+          Each of rhel8_instances, rhel9_instances, rhel10_instances,
+          and linux_instances must be a number from 0 to 20.
       loop: "{{ os_requests }}"
 
     - name: Build the requested instance names
@@ -45,18 +51,20 @@
         name_prefix: "{{ 'lab-ovirt' if (ovirt_only | bool) else instance_name_prefix }}"
         spec:
           os_major: "{{ item.0.os_major }}"
-          name: "{{ name_prefix ~ '-rhel' ~ item.0.os_major ~ '-' ~ pet ~ '-' ~ ('%02d' | format(item.1 | int)) }}"
+          os_label: "{{ item.0.os_label }}"
+          name: "{{ name_prefix ~ '-' ~ item.0.os_label ~ '-' ~ pet ~ '-' ~ ('%02d' | format(item.1 | int)) }}"
       loop: "{{ os_requests | product(range(1, 21) | list) | list }}"
       when:
         - item.0.count | int > 0
         - item.1 | int <= item.0.count | int
       loop_control:
-        label: "RHEL {{ item.0.os_major }} {{ '%02d' | format(item.1 | int) }}"
+        label: "{{ item.0.os_label }} {{ '%02d' | format(item.1 | int) }}"
 
     - name: Build one default oVirt instance name
       ansible.builtin.set_fact:
         ovirt_instance_specs:
           - os_major: "{{ default_os_major }}"
+            os_label: "{{ 'rhel' ~ default_os_major }}"
             name: "{{ name_prefix ~ '-rhel' ~ default_os_major ~ '-' ~ pet ~ '-01' }}"
       vars:
         default_os_major: "{{ os_major | default(10) }}"
@@ -70,6 +78,7 @@
       vars:
         instance:
           os_major: "{{ item.os_major }}"
+          os_label: "{{ item.os_label }}"
           name: "{{ item.name }}"
           mac_address: "{{ '56:6f:30' | community.general.random_mac(seed=item.name) }}"
       loop: "{{ ovirt_instance_specs | default([]) }}"
@@ -79,7 +88,7 @@
 
     - name: Show instances to create
       ansible.builtin.debug:
-        msg: "{{ item.name }}.{{ domain_name }} RHEL {{ item.os_major }} {{ item.mac_address }}"
+        msg: "{{ item.name }}.{{ domain_name }} {{ 'Linux' if item.os_label == 'linux' else 'RHEL ' ~ item.os_major }} {{ item.mac_address }}"
       loop: "{{ ovirt_instances }}"
       loop_control:
         label: "{{ item.name }}"

@@ -81,7 +81,7 @@ controller_templates:
   webhook_service:
   webhook_credential:
 - name: "infra: create host ovirt"
-  description: "Create RHEL 8, 9, and 10 instances on oVirt"
+  description: "Create RHEL 8, 9, and 10 instances, or generic Linux instances, on oVirt"
   credentials:
     - "vault"
     - "Satellite 6"
