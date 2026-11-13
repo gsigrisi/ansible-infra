@@ -7,9 +7,7 @@
     - redhat.rhv
 
   vars_files:
-    - "{{ playbook_dir }}/../../vaults/engine_vars.yml"
-
-  vars:
+    - "{{ playbook_dir }}/../../vaults/{{ env }}-vault.yml"
 
   roles:
     - role: shutdown_env

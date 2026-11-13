@@ -22,6 +22,10 @@
         instance_name_prefix: lab
       when: instance_name_prefix | default('') | length == 0
 
+    - name: Record an oVirt-only run
+      ansible.builtin.set_fact:
+        ovirt_only: "{{ not (create_discovery_rule | default(false) | bool) }}"
+
     - name: Check the survey answers
       ansible.builtin.assert:
         that:
@@ -37,9 +41,10 @@
       ansible.builtin.set_fact:
         ovirt_instance_specs: "{{ ovirt_instance_specs | default([]) + [spec] }}"
       vars:
+        pet: "{{ lookup('community.general.random_pet', words=1) }}"
         spec:
           os_major: "{{ item.0.os_major }}"
-          name: "{{ instance_name_prefix }}-rhel{{ item.0.os_major }}-{{ lookup('community.general.random_pet', words=1) }}-{{ '%02d' | format(item.1 | int) }}"
+          name: "{{ ('lab-ovirt-' ~ pet) if (ovirt_only | bool) else (instance_name_prefix ~ '-rhel' ~ item.0.os_major ~ '-' ~ pet ~ '-' ~ ('%02d' | format(item.1 | int))) }}"
       loop: "{{ os_requests | product(range(1, 21) | list) | list }}"
       when:
         - item.0.count | int > 0
@@ -51,9 +56,10 @@
       ansible.builtin.set_fact:
         ovirt_instance_specs:
           - os_major: "{{ default_os_major }}"
-            name: "{{ instance_name_prefix }}-rhel{{ default_os_major }}-{{ lookup('community.general.random_pet', words=1) }}-01"
+            name: "{{ ('lab-ovirt-' ~ pet) if (ovirt_only | bool) else (instance_name_prefix ~ '-rhel' ~ default_os_major ~ '-' ~ pet ~ '-01') }}"
       vars:
         default_os_major: "{{ os_major | default(9) }}"
+        pet: "{{ lookup('community.general.random_pet', words=1) }}"
       when: requested_instance_count | int == 0
 
     - name: Build the requested instances
@@ -71,7 +77,9 @@
 
     - name: Show instances to create
       ansible.builtin.debug:
-        msg: "{{ item.name }}.{{ domain_name }} RHEL {{ item.os_major }} {{ item.mac_address }}"
+        msg: "{{ vm_name }} RHEL {{ item.os_major }} {{ item.mac_address }}"
+      vars:
+        vm_name: "{{ item.name if (ovirt_only | bool) else item.name ~ '.' ~ domain_name }}"
       loop: "{{ ovirt_instances }}"
       loop_control:
         label: "{{ item.name }}"
@@ -108,7 +116,7 @@
         ovirt_vms: "{{ ovirt_vms | default([]) + [vm_def] }}"
       vars:
         vm_def:
-          name: "{{ item.name }}.{{ domain_name }}"
+          name: "{{ item.name if (ovirt_only | bool) else item.name ~ '.' ~ domain_name }}"
           cluster: Default
           memory: 4GiB
           cpu_cores: 2
