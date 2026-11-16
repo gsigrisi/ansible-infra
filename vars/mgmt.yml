@@ -205,6 +205,12 @@ satellite_content_credentials:
     content: "{{ lookup('url', 'http://mirror.init7.net/fedora/epel/RPM-GPG-KEY-EPEL-10', split_lines=False) }}"
 
 satellite_products:
+  - name: Red Hat Enterprise Linux Server - Extended Life Cycle Support
+    repository_sets:
+      - name: Red Hat Enterprise Linux 7 Server - Extended Life Cycle Support (RPMs)
+        basearch: x86_64
+      - name: Red Hat Enterprise Linux 7 Server - Extended Life Cycle Support - Optional (RPMs)
+        basearch: x86_64
 
   - name: Red Hat Enterprise Linux for x86_64 - Extended Update Support
     repository_sets:

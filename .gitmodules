@@ -1,6 +1,3 @@
 [submodule "roles/pinguozzo.create-users"]
 	path = roles/pinguozzo.create-users
 	url = https://github.com/ryandaniels/ansible-role-create-users.git
-[submodule "roles/ldelouw.rh-satellite"]
-	path = roles/ldelouw.rh-satellite
-	url = https://github.com/ldelouw/rh-satellite-ansible-playbook.git
