@@ -3,6 +3,23 @@ all:
   vars:
     location: CH
     timezone: Europe\Zurich
+    set_3rdparty: false
+    set_ak: false
+    set_cv: false
+    set_disconnected: false
+    set_environments: false
+    set_force_promote: true
+    set_force_register: false
+    set_fresh_install: false
+    set_global: false
+    set_installer: false
+    set_locations: false
+    set_lvm: false
+    set_manifest: false
+    set_repos: false
+    set_sync: false
+    set_sync_plan: false
+    set_sync_repos: false
   hosts:
     virt-console:
       ansible_host: virt-console.mgmt.zg.pinguozzo.com
@@ -13,23 +30,6 @@ all:
       ansible_host: satellite.mgmt.zg.pinguozzo.com
       env: mgmt
       infra: yes
-      set_3rdparty: false
-      set_ak: false
-      set_cv: false
-      set_disconnected: false
-      set_environments: false
-      set_force_promote: true
-      set_force_register: false
-      set_fresh_install: false
-      set_global: false
-      set_installer: false
-      set_locations: false
-      set_lvm: false
-      set_manifest: false
-      set_repos: false
-      set_sync: false
-      set_sync_plan: false
-      set_sync_repos: false
     localhost:
       ansible_connection: local
       ansible_python_interpreter: "{{ ansible_playbook_python }}"
